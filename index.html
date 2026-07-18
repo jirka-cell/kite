@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#101821">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<script src="./scoring.js"></script>
+<title>Kite check</title>
+<style>
+  :root{
+    --bg:#101821; --panel:#16202B; --panelHi:#1B2836; --line:#263343;
+    --text:#D6E0EA; --muted:#728398; --dim:#4A5967;
+    --go:#35C08A; --mar:#D9A441; --storm:#E05B45;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+  body{padding:20px 16px 50px}
+  .wrap{max-width:1240px;margin:0 auto}
+
+  .head{display:flex;justify-content:space-between;align-items:baseline;
+        gap:16px;flex-wrap:wrap;margin-bottom:5px}
+  h1{margin:0;font-size:15px;letter-spacing:.18em;font-weight:700;text-transform:uppercase}
+  .prof{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .legend{margin:0 0 20px;font-size:11px;color:var(--muted);line-height:1.6;max-width:760px}
+  .legend b{color:var(--text);font-weight:600}
+
+  .key{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 18px;font-size:10.5px;
+       color:var(--muted);font-family:var(--mono)}
+  .key span{display:flex;align-items:center;gap:6px}
+  .key i{width:16px;height:9px;border-radius:2px;border:1px solid var(--line);flex-shrink:0}
+  .key i.k-go{background:#13241E;border-color:#2E8C68;border-left:3px solid var(--go)}
+  .key i.k-mar{background:#221D13;border-color:#8C6B2E;border-left:3px solid var(--mar)}
+  .key i.k-storm{background:#221412;border-color:#8C4034;border-left:3px solid var(--storm)}
+  .key i.k-nic{background:var(--panel);border-left:3px solid var(--dim)}
+  .key i.k-none{display:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
+
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+        border-left:3px solid var(--dim);padding:12px 13px;cursor:pointer;
+        transition:background .12s, box-shadow .12s}
+  .tile:hover{background:var(--panelHi)}
+  .tile.sel{outline:1px solid var(--muted);outline-offset:-1px}
+
+  /* rámeček = verdikt nejlepšího ze 4 dnů, čitelný periferně */
+  .tile.jede{border-color:#2E8C68;border-left-color:var(--go);background:#13241E;
+             box-shadow:inset 0 0 0 1px rgba(53,192,138,.10)}
+  .tile.jede:hover{background:#172C24}
+  .tile.hranicni{border-color:#8C6B2E;border-left-color:var(--mar);background:#221D13;
+             box-shadow:inset 0 0 0 1px rgba(217,164,65,.10)}
+  .tile.hranicni:hover{background:#2A2418}
+  .tile.boure{border-color:#8C4034;border-left-color:var(--storm);background:#221412;
+             box-shadow:inset 0 0 0 1px rgba(224,91,69,.10)}
+  .tile.boure:hover{background:#2A1916}
+
+  .th{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .tn{font-size:13.5px;font-weight:650;letter-spacing:.01em}
+  .ts{font-size:9.5px;color:var(--muted);margin-top:1px}
+  .tkm{font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap}
+
+  .days{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:11px 0 0}
+  .day{text-align:center}
+  .dlab{font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:3px}
+  .day svg{width:100%;height:auto;display:block}
+  .dk{font-family:var(--mono);font-size:11px;margin-top:4px;color:var(--dim)}
+  .dk.go{color:var(--go)} .dk.mar{color:var(--mar)} .dk.storm{color:var(--storm)}
+  .stars{letter-spacing:.5px}
+  .stars .e{opacity:.20}
+  .dk .gustup{color:var(--mar);font-size:9px;vertical-align:top;margin-left:1px}
+
+  .best{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:9px;
+        padding-top:8px;border-top:1px solid #1C2733;line-height:1.7}
+  .best .lead{color:var(--text)}
+  .w-mar{color:var(--mar)} .w-storm{color:var(--storm)} .w-go{color:var(--go)}
+  .flag{font-size:9.5px;color:var(--mar);margin-top:6px;line-height:1.5}
+  .flag.dim{color:var(--dim)}
+
+  /* --- WG panel --- */
+  #wgwrap{margin-top:22px;background:var(--panel);border:1px solid var(--line);
+          border-radius:4px;padding:13px;display:none}
+  #wgwrap h2{margin:0 0 3px;font-size:12px;font-weight:650}
+  #wgwrap .sub{font-size:10px;color:var(--muted);margin-bottom:10px}
+  #wgslot{background:#fff;border-radius:3px;min-height:60px}
+  #wgnote{font-size:11px;color:var(--muted);line-height:1.6;padding:14px;
+          font-family:var(--mono);font-size:10px}
+
+  .msg{font-family:var(--mono);font-size:11px;color:var(--muted);padding:24px}
+  .err{border:1px solid var(--storm);border-radius:4px;padding:14px;font-size:12px;line-height:1.6}
+  .foot{font-size:10px;color:var(--dim);line-height:1.7;margin-top:22px;max-width:820px}
+  code{color:var(--mar);font-family:var(--mono)}
+  button.rl{background:none;border:1px solid var(--line);color:var(--muted);
+    font-family:var(--mono);font-size:10px;padding:5px 9px;border-radius:3px;
+    cursor:pointer;margin-top:9px}
+  button.rl:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <h1>Kite check</h1>
+    <span class="prof">98 kg &middot; 8/12/14 m&sup2; &middot; ICON seamless</span>
+  </div>
+  <p class="legend">
+    Plná výplň je střední vítr, vlásek nad ní poryv. Čárkovaná čára je <b>6,0 m/s</b> —
+    pod ní ti nic z kvéru nenaplaní. <b>Osa je pevná 0–16 m/s ve všech dlaždicích</b>,
+    takže se dají porovnat okem. Šedé hodiny mají špatný směr.
+    Klikni na dlaždici → dole naskočí Windguru mix pro ověření.
+    <b>Hrana sektoru je tvrdý řez</b> — pár stupňů rozhodne. Když je dlaždice
+    „mimo jen o X°“, koukni do widgetu, ne na můj verdikt.
+    <b>Nárazovost verdikt neovlivňuje</b> — GF je jen informace. Bouřku hlídá CAPE.
+  </p>
+  <div class="key">
+    <span><i class="k-go"></i>Jede — vejde se do kvéru</span>
+    <span><i class="k-mar"></i>Hraniční — pod 6,0 m/s</span>
+    <span><i class="k-storm"></i>Konvekce — CAPE&nbsp;&gt;&nbsp;1500 nebo konv. srážky</span>
+    <span><i class="k-nic"></i>Nefouká / špatný směr</span>
+    <span><i class="k-none"></i>★ 6 · ★★ 9 · ★★★ 12&nbsp;m/s — prahy středního větru</span>
+    <span><i class="k-none"></i><span style="color:var(--mar)">↑</span> = poryvy tlačí na menší kite</span>
+  </div>
+
+  <div id="notifbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+       margin:0 0 16px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);
+       border-radius:4px;font-size:11px;color:var(--muted)">
+    <span id="notiftxt">Ranní brief: vypnuto</span>
+    <button class="rl" id="notifbtn" style="margin:0" onclick="enableNotif()">Zapnout</button>
+    <button class="rl" id="testbtn" style="margin:0;display:none" onclick="testNotif()">Zkusit teď</button>
+  </div>
+
+  <div id="out"><div class="msg">Tahám data…</div></div>
+
+  <div id="wgwrap">
+    <h2 id="wgname"></h2>
+    <div class="sub" id="wgsub"></div>
+    <div id="wgslot"></div>
+  </div>
+
+  <div class="foot" id="foot"></div>
+</div>
+
+<script>
+/* ================================================================== *
+ *  KONFIGURACE — tady se sahá
+ * ================================================================== *
+ *
+ *  dirs : [od°, do°] po směru hodinových ručiček = sektor, ze kterého
+ *         MUSÍ foukat. null = sektor neznám → hradbu NEUPLATŇUJI
+ *         (radši žádné pravidlo než vymyšlené).
+ *  guess: true = sektor je můj odhad, ne ověřený fakt.
+ *  wg   : Windguru spot ID. null = nevím, doplň z widget generátoru.
+ */
+var C = { go:"#35C08A", mar:"#D9A441", storm:"#E05B45", dim:"#4A5967", line:"#263343" };
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+/* ---- páteř: pevná osa 0–SCALE_MAX ---- */
+function spine(hrs, dirs){
+  var W=100,H=34,pad=1;
+  var bw=(W-pad*2)/hrs.length;
+  function y(v){ return H-7-(Math.min(v,SCALE_MAX)/SCALE_MAX)*(H-9); }
+  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">';
+  s+='<line x1="0" x2="'+W+'" y1="'+y(MIN_RIDE)+'" y2="'+y(MIN_RIDE)+
+     '" stroke="'+C.line+'" stroke-width="0.6" stroke-dasharray="1.5 2"/>';
+  hrs.forEach(function(h,i){
+    var x=pad+i*bw+bw*0.15, w=bw*0.7, cx=x+w/2;
+    var live=inSector(h.dir,dirs);
+    var col=!live?C.dim:h.wind>=MIN_RIDE?C.go:h.wind>=MIN_MARGINAL?C.mar:C.dim;
+    s+='<line x1="'+cx+'" x2="'+cx+'" y1="'+y(h.gust)+'" y2="'+y(h.wind)+
+       '" stroke="'+col+'" stroke-width="0.5" opacity="0.5"/>';
+    s+='<rect x="'+x+'" y="'+y(h.wind)+'" width="'+w+'" height="'+(H-7-y(h.wind))+
+       '" fill="'+col+'" opacity="'+(live?0.9:0.3)+'"/>';
+  });
+  return s+'</svg>';
+}
+
+/* ---- render ---- */
+var DATA=null, DATES=[], SELECTED=null;
+function dayName(iso){
+  var n=["Ne","Po","Út","St","Čt","Pá","So"], d=new Date(iso+"T12:00:00");
+  return n[d.getDay()]+" "+d.getDate()+".";
+}
+
+function render(){
+  var cards = rank(DATA, DATES, null);
+
+  document.getElementById("out").innerHTML =
+    '<div class="grid">' + cards.map(function(c){
+      var s=c.s, b=c.best;
+      var h = '<div class="tile '+(b?b.v:"nic")+(SELECTED===s.id?" sel":"")+'" data-id="'+s.id+'">';
+      h += '<div class="th"><div><div class="tn">'+esc(s.name)+'</div>'+
+           '<div class="ts">'+esc(s.sub)+'</div></div>'+
+           '<div class="tkm">'+s.km+' km</div></div>';
+
+      h += '<div class="days">';
+      c.days.forEach(function(a,j){
+        h += '<div class="day"><div class="dlab">'+dayName(DATES[j])+'</div>';
+        h += a ? spine(a.hrs, s.dirs) : '';
+        var cls = !a ? "" : a.v==="jede"?"go":a.v==="hranicni"?"mar":a.v==="boure"?"storm":"";
+        var inner = "—";
+        if(a&&a.v==="boure") inner="⚡";
+        else if(a&&a.w&&a.w.kite){
+          var ns = starCount(a.w.mean);
+          inner = '<span class="stars">'+"★".repeat(ns)+'<span class="e">'+"★".repeat(3-ns)+'</span></span>';
+          var kg = a.w.kiteGust;
+          if(kg && kg!==a.w.kite) inner += '<span class="gustup" title="poryvy tlačí na menší kite">↑</span>';
+        }
+        h += '<div class="dk '+cls+'">'+inner+'</div></div>';
+      });
+      h += '</div>';
+
+      if(b&&b.w){
+        var w=b.w, bi=c.days.indexOf(b);
+        h += '<div class="best"><span class="lead">'+dayName(DATES[bi])+' '+
+             w.from+'–'+w.to+'h</span> · '+w.mean.toFixed(1)+' m/s · '+compass(w.dir)+
+             ' · GF '+w.gf.toFixed(2);
+        if(w.kite && w.kiteGust && w.kiteGust!==w.kite)
+          h += ' · <span class="w-mar">poryv na '+(w.kiteGust==="moc"?"víc než 8":w.kiteGust)+'</span>';
+        if(w.cape>CAPE_WATCH) h += ' · <span class="'+(w.cape>CAPE_ALARM?"w-storm":"w-mar")+
+             '">CAPE '+Math.round(w.cape)+'</span>';
+        if(w.show>RAIN_FLAG) h += ' · <span class="w-storm">'+w.show.toFixed(1)+' mm konv.</span>';
+        h += '</div>';
+      } else {
+        var bi2 = b?c.days.indexOf(b):-1;
+        h += '<div class="best">'+(b?'<span class="lead">'+dayName(DATES[bi2])+'</span> · '+esc(b.label):"—")+
+             (b?' · max '+b.peak.toFixed(1)+' m/s':'');
+        if(b&&b.label==="Špatný směr"&&b.hrs.length){
+          var pk = b.hrs.reduce(function(a,x){ return x.wind>a.wind?x:a; }, b.hrs[0]);
+          var miss = Math.min(Math.abs(pk.dir-s.dirs[0]), Math.abs(pk.dir-s.dirs[1]));
+          if(miss>180) miss = 360-miss;
+          h += ' · vane '+compass(pk.dir)+' ('+Math.round(pk.dir)+'°), sektor '+
+               s.dirs[0]+'–'+s.dirs[1]+'°';
+          if(miss<=20) h += ' <span class="w-mar">— mimo jen o '+Math.round(miss)+'°</span>';
+        }
+        h += '</div>';
+      }
+
+      if(s.flag) h += '<div class="flag'+(s.dirs&&!s.guess?" dim":"")+'">'+esc(s.flag)+'</div>';
+      return h + '</div>';
+    }).join("") + '</div>';
+
+  document.getElementById("foot").innerHTML =
+    'Data <strong>Open-Meteo, model ICON seamless</strong> (D2 2,2 km na blízko → ICON-EU 7 km dál), '+
+    'vítr v 10 m. Není to Windguru mix — ten má ~63 % vah jinde a je systematicky '+
+    'o ~0,5 m/s níž. Ber tohle jako síto, widget jako rozhodnutí. '+
+    'Sektory směrů: kde je <code>null</code>, směr se NEHODNOTÍ — radši žádné pravidlo než vymyšlené. '+
+    '<br><button class="rl" onclick="load()">Načíst znovu</button>';
+}
+
+/* ---- WG widget na klik ---- */
+function showWG(id){
+  var s = SPOTS.filter(function(x){return x.id===id;})[0];
+  SELECTED = id; render();
+  var wrap=document.getElementById("wgwrap"), slot=document.getElementById("wgslot");
+  wrap.style.display="block";
+  document.getElementById("wgname").textContent = s.name + " — Windguru (WG mix)";
+  document.getElementById("wgsub").textContent = s.sub + " · " + s.km + " km z Varů";
+  slot.innerHTML="";
+  if(!s.wg){
+    slot.innerHTML = '<div id="wgnote">Windguru spot ID pro tenhle spot nemám.<br><br>'+
+      'Vygeneruj widget na windguru.cz → z kódu opiš číslo za <b>s=</b> → doplň do '+
+      'konfigurace nahoře k <b>'+esc(s.id)+'</b> jako <b>wg: číslo</b>.</div>';
+    wrap.scrollIntoView({behavior:"smooth", block:"nearest"});
+    return;
+  }
+  var uid = "wg_fwdg_"+s.wg+"_100_"+Date.now();
+  var anchor = document.createElement("script"); anchor.id = uid; slot.appendChild(anchor);
+  var ld = document.createElement("script");
+  ld.src = "https://www.windguru.cz/js/widget.php?" + [
+    "s="+s.wg, "m=100", "uid="+uid, "wj=ms", "tj=c", "waj=m", "tij=cm",
+    "odh=0", "doh=24", "fhours=96", "hrsm=2", "vt=forecasts", "lng=cz", "idbs=1",
+    "p=WINDSPD,GUST,SMER,APCP1s,RATING"
+  ].join("&");
+  slot.appendChild(ld);
+  wrap.scrollIntoView({behavior:"smooth", block:"nearest"});
+  setTimeout(function(){
+    if(slot.querySelectorAll("iframe,table,div").length===0)
+      slot.innerHTML='<div id="wgnote">Widget se nevykreslil. Jsi online?</div>';
+  }, 5000);
+}
+
+document.addEventListener("click", function(e){
+  var t = e.target.closest(".tile");
+  if(t) showWG(t.dataset.id);
+});
+
+/* ---- data ---- */
+function draw(json, fromCache){
+  DATA = parseForecast(json);
+  DATES = Object.keys(DATA[0]).sort().slice(0,4);
+  render();
+  if(fromCache){
+    var b=document.createElement("div");
+    b.style.cssText="font-family:var(--mono);font-size:10px;color:var(--mar);margin:10px 0 0";
+    b.textContent="⚠ offline — poslední stažená data ("+(localStorage.getItem("kite-when")||"?")+")";
+    document.getElementById("out").appendChild(b);
+  }
+}
+function load(){
+  document.getElementById("out").innerHTML='<div class="msg">Tahám data…</div>';
+  fetch(buildUrl()).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
+  }).then(function(j){
+    try{ localStorage.setItem("kite-cache", JSON.stringify(j));
+         localStorage.setItem("kite-when", new Date().toLocaleString("cs-CZ")); }catch(e){}
+    draw(j, false);
+  }).catch(function(e){
+    var cached=null; try{ cached=localStorage.getItem("kite-cache"); }catch(e2){}
+    if(cached){ draw(JSON.parse(cached), true); return; }
+    document.getElementById("out").innerHTML =
+      '<div class="err"><strong>Data se nenačetla</strong> ('+esc(e.message)+') a nemám offline zálohu.<br>'+
+      '<button class="rl" onclick="load()">Zkusit znovu</button></div>';
+  });
+}
+/* ---------------- PWA: service worker + notifikace ---------------- */
+var SW_REG=null;
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").then(function(r){ SW_REG=r; refreshNotifUI(); })
+    .catch(function(){ /* file:// nebo bez https → SW nejede, appka funguje dál */ });
+}
+function refreshNotifUI(){
+  var txt=document.getElementById("notiftxt"), btn=document.getElementById("notifbtn"),
+      test=document.getElementById("testbtn");
+  if(!("Notification" in window) || !("serviceWorker" in navigator)){
+    txt.textContent="Ranní brief: prohlížeč nepodporuje"; btn.style.display="none"; return;
+  }
+  if(Notification.permission==="granted"){
+    txt.textContent="Ranní brief: zapnuto"; btn.style.display="none"; test.style.display="";
+    if(SW_REG && SW_REG.periodicSync){
+      SW_REG.periodicSync.register("kite-morning",{minInterval:12*60*60*1000}).catch(function(){});
+    }
+  } else if(Notification.permission==="denied"){
+    txt.textContent="Ranní brief: zakázáno v prohlížeči"; btn.style.display="none";
+  } else {
+    txt.textContent="Ranní brief: vypnuto"; btn.style.display=""; test.style.display="none";
+  }
+}
+function enableNotif(){
+  if(!("Notification" in window)) return;
+  Notification.requestPermission().then(function(){ refreshNotifUI(); });
+}
+function testNotif(){
+  if(SW_REG && SW_REG.active){ SW_REG.active.postMessage("run-brief"); }
+}
+
+load();
+refreshNotifUI();
+</script>
+</body>
+</html>
