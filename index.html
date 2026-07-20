@@ -1,4 +1,73 @@
-<!DOCTYPE html>
+<!-- NASTAVENÍ -->
+<div id="ovl"><div class="modal">
+  <div class="mhead"><h2 id="m_t"></h2><span class="x" onclick="closeSet()">✕</span></div>
+
+  <div id="g_secs">
+    <div class="sec"><h3 id="m_gen"></h3>
+      <div class="row"><div class="lbl" id="m_mode"></div>
+        <div class="seg" id="modeseg"><span data-m="kite">kite</span><span data-m="ws">windsurf</span></div></div>
+      <div class="row"><div class="lbl" id="m_home"></div><input class="inp wide" id="i_home"></div>
+      <div class="row"><div class="lbl" id="m_wu"></div>
+        <div class="seg" id="unitseg"><span data-u="ms">m/s</span><span data-u="kt">kt</span><span data-u="kmh">km/h</span></div></div>
+      <div class="row"><div class="lbl" id="m_wt"></div><input class="inp" id="i_w" type="number"></div>
+      <div class="row"><div class="lbl" id="m_hrs"></div>
+        <span><input class="inp" id="i_h1" type="number" min="0" max="23" style="width:52px">–<input class="inp" id="i_h2" type="number" min="0" max="23" style="width:52px"></span></div>
+      <div class="row"><div class="lbl" id="m_cape"></div><input class="inp" id="i_cape" type="number"></div>
+      <div class="row"><div class="lbl" id="m_sort"></div>
+        <div class="seg" id="sortseg"><span data-s="wind" id="m_sw"></span><span data-s="custom" id="m_sc"></span></div></div>
+    </div>
+
+    <div class="sec"><h3 id="m_gear"></h3>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px" id="m_gearcap"></div>
+      <table class="gt" id="geartab"></table>
+      <button class="addb" id="addgear"></button>
+    </div>
+
+    <div class="sec"><h3 id="m_spots"></h3>
+      <table class="sp" id="spottab"></table>
+      <button class="addb" id="addspotbtn"></button>
+      <div class="addform" id="addform">
+        <div style="font-size:10px;color:var(--dim);margin-bottom:5px" id="a_req"></div>
+        <div class="row"><div class="lbl"><span id="a_n"></span> *<small id="a_nh"></small></div><input class="inp wide" id="f_name"></div>
+        <div class="row"><div class="lbl">Lat / Lon *<small id="a_llh"></small></div>
+          <span><input class="inp" id="f_lat" style="width:74px" placeholder="50.35"> <input class="inp" id="f_lon" style="width:74px" placeholder="13.39"></span></div>
+        <div class="row"><div class="lbl">km<small id="a_kmh"></small></div><input class="inp" id="f_km" type="number"></div>
+        <div class="row"><div class="lbl">Windguru<small id="a_wgh"></small></div><input class="inp" id="f_wg" type="number"></div>
+        <div class="row"><div class="lbl"><span id="a_d"></span><small id="a_dh"></small></div><input class="inp wide" id="f_dirs" placeholder="45-160"></div>
+        <div style="font-size:11px;color:var(--storm);display:none;margin-top:4px" id="f_err"></div>
+        <button class="addb" id="f_ok"></button>
+      </div>
+    </div>
+
+    <div class="sec"><h3 id="m_bk"></h3>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:7px" id="m_bkcap"></div>
+      <textarea id="bk" style="width:100%;height:70px;background:var(--bg);border:1px solid var(--line);
+        border-radius:3px;color:var(--muted);font-family:var(--mono);font-size:10px;padding:7px"></textarea>
+      <div style="display:flex;gap:8px;margin-top:7px">
+        <button class="rl" id="bk_exp"></button><button class="rl" id="bk_imp"></button>
+        <span style="font-size:10px;color:var(--go);align-self:center" id="bk_note"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="ps_sec" style="display:none">
+    <div class="sec">
+      <input type="hidden" id="ps_id">
+      <div class="row"><div class="lbl" id="ps_d"></div><input class="inp wide" id="ps_dirs" placeholder="45-315"></div>
+      <div class="row"><div class="lbl" id="ps_nsec"></div>
+        <div class="seg" id="secseg"><span data-n="1" id="ps_s1"></span><span data-n="2" id="ps_s2"></span></div></div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin:8px 0 4px">
+        <svg class="rose" width="150" height="150" viewBox="0 0 200 200" id="rose1"></svg>
+        <svg class="rose" width="150" height="150" viewBox="0 0 200 200" id="rose2" style="display:none"></svg>
+        <div style="font-size:10px;color:var(--dim);max-width:210px;line-height:1.5" id="ps_hint"></div>
+      </div>
+      <div class="row"><div class="lbl" id="ps_m"></div><input class="inp" id="ps_min" type="number" step="0.5"></div>
+      <div class="row"><div class="lbl">Windguru</div><input class="inp" id="ps_wg" type="number"></div>
+    </div>
+  </div>
+
+  <button class="save" id="savebtn"></button>
+</div></div><!DOCTYPE html>
 <html lang="cs">
 <head>
 <meta charset="utf-8">
@@ -27,11 +96,7 @@
   .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
   h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--accent)}
   .tools{display:flex;gap:8px;align-items:center}
-  .gear{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--panel);
-        display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);font-size:17px}
   .sub{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:14px}
-  .brief{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:9px 12px;
-         background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:11px;color:var(--muted)}
   button.rl{background:none;border:1px solid var(--line);color:var(--muted);font-family:var(--mono);
     font-size:10px;padding:5px 9px;border-radius:3px;cursor:pointer}
   button.rl:hover{color:var(--text)}
@@ -132,6 +197,9 @@
   .addform .row{padding:4px 0}
   .save{margin-top:12px;width:100%;background:var(--accent);border:none;color:#0B2545;font-weight:700;
     font-family:var(--mono);font-size:12px;padding:10px;border-radius:5px;cursor:pointer}
+    .rose{cursor:crosshair}
+  .rose text{font-family:var(--mono);fill:var(--muted)} .rose .lbl-n{fill:var(--text);font-weight:700}
+  input.bad{border-color:var(--storm)!important}
   .msg{font-family:var(--mono);font-size:11px;color:var(--muted);padding:22px}
   .err{border:1px solid var(--storm);border-radius:6px;padding:13px;font-size:12px;line-height:1.6}
   .offnote{font-family:var(--mono);font-size:10px;color:var(--mar);margin-top:9px}
@@ -140,18 +208,13 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <h1>Kite check</h1>
+    <h1 id="apptitle">Kite check</h1>
     <div class="tools">
       <div class="seg" id="langseg"><span data-l="cs">CZ</span><span data-l="en">EN</span><span data-l="de">DE</span></div>
-      <div class="seg" id="modeseg"><span data-m="kite">kite</span><span data-m="ws" id="wslbl">windsurf</span></div>
-      <div class="gear" id="gearbtn" title="">⚙</div>
+      <div class="seg" id="gearseg"><span id="gearbtn">⚙</span></div>
     </div>
   </div>
   <div class="sub" id="subline"></div>
-
-  <div class="brief"><span id="brieftxt"></span>
-    <button class="rl" id="briefbtn" style="display:none"></button>
-    <button class="rl" id="brieftest" style="display:none"></button></div>
 
   <div id="out"><div class="msg" id="loadmsg"></div></div>
 
@@ -242,7 +305,14 @@ var T={
    gcol:["velikost","od","do","hvězdy"], addG:"+ Přidat {one}",
    spots:"Spoty", addS:"+ Přidat spot", name:"Název", dirs:"Odkud fouká", okBtn:"Přidat",
    ps:"Nastavení spotu", psd:"Odkud fouká (např. 45-315, dva sektory čárkou)", psm:"Nejnižší vítr (m/s)",
-   save:"Uložit a zavřít",
+   save:"Uložit a zavřít", mode:"Sport", modeK:"kite", modeW:"windsurf",
+   bk:"Záloha nastavení", bkCap:"Zkopíruj si text před aktualizací appky nebo pro přenos do jiného zařízení. Vložením zpět nastavení obnovíš.",
+   exp:"Zkopírovat", imp:"Načíst zpět", bkOk:"hotovo",
+   aReq:"* povinné", aNh:"jak se spot zobrazí", aLlh:"v mapě klikni pravým na místo → zkopíruj dvě čísla",
+   aKmh:"z domova, jen pro řazení", aWgh:"číslo z widgetu, nepovinné", aDh:"nepovinné, doplníš i v nastavení spotu",
+   aErr:"Vyplň název i souřadnice (Lat i Lon).",
+   nsec:"Počet směrů", s1:"1 směr", s2:"2 směry",
+   psHint:"Klepni do růžice: první klik = odkud, druhý = kam. Zelený výsek jede.",
    kite:{gear:"kity", one:"kite", u:"m²"}, ws:{gear:"plachty", one:"plachta", u:"m²"}},
  en:{sub:"{w} kg · {gear}: {list}", load:"Loading data…", offline:"⚠ offline — last downloaded data ({t})",
    timeout:"connection timed out (12 s) — weak signal?", errT:"Could not load data",
@@ -271,7 +341,14 @@ var T={
    gcol:["size","from","to","stars"], addG:"+ Add {one}",
    spots:"Spots", addS:"+ Add spot", name:"Name", dirs:"Wind from", okBtn:"Add",
    ps:"Per-spot settings", psd:"Wind from (e.g. 45-315; two sectors comma-sep)", psm:"Minimum wind (m/s)",
-   save:"Save & close",
+   save:"Save & close", mode:"Sport", modeK:"kite", modeW:"windsurf",
+   bk:"Settings backup", bkCap:"Copy this before updating the app or to move it to another device. Paste back to restore.",
+   exp:"Copy", imp:"Restore", bkOk:"done",
+   aReq:"* required", aNh:"how the spot shows up", aLlh:"in a map, right-click the spot → copy the two numbers",
+   aKmh:"from home, only for sorting", aWgh:"number from the widget, optional", aDh:"optional, also editable in spot settings",
+   aErr:"Fill in name and coordinates (both Lat and Lon).",
+   nsec:"Number of directions", s1:"1 direction", s2:"2 directions",
+   psHint:"Tap the rose: first tap = from, second = to. Green arc rides.",
    kite:{gear:"kites", one:"kite", u:"m²"}, ws:{gear:"sails", one:"sail", u:"m²"}},
  de:{sub:"{w} kg · {gear}: {list}", load:"Lade Daten…", offline:"⚠ offline — letzte Daten ({t})",
    timeout:"Zeitüberschreitung (12 s) — schwaches Signal?", errT:"Daten konnten nicht geladen werden",
@@ -300,7 +377,14 @@ var T={
    gcol:["Größe","von","bis","Sterne"], addG:"+ {one} hinzufügen",
    spots:"Spots", addS:"+ Spot hinzufügen", name:"Name", dirs:"Wind aus", okBtn:"Hinzufügen",
    ps:"Spot-Einstellungen", psd:"Wind aus (z. B. 45-315; zwei Sektoren mit Komma)", psm:"Mindestwind (m/s)",
-   save:"Speichern & schließen",
+   save:"Speichern & schließen", mode:"Sportart", modeK:"Kite", modeW:"Windsurf",
+   bk:"Einstellungen sichern", bkCap:"Vor dem Update kopieren oder auf ein anderes Gerät übertragen. Zum Wiederherstellen einfügen.",
+   exp:"Kopieren", imp:"Laden", bkOk:"fertig",
+   aReq:"* Pflicht", aNh:"wie der Spot angezeigt wird", aLlh:"in einer Karte Rechtsklick auf den Ort → zwei Zahlen kopieren",
+   aKmh:"von zu Hause, nur zum Sortieren", aWgh:"Nummer vom Widget, optional", aDh:"optional, auch in Spot-Einstellungen",
+   aErr:"Name und Koordinaten (Lat und Lon) ausfüllen.",
+   nsec:"Anzahl Richtungen", s1:"1 Richtung", s2:"2 Richtungen",
+   psHint:"In die Rose tippen: erster Tipp = von, zweiter = bis. Grüner Bogen fährt.",
    kite:{gear:"Kites", one:"Kite", u:"m²"}, ws:{gear:"Segel", one:"Segel", u:"m²"}}
 };
 function tr(k){ return T[CFG.lang][k]; }
@@ -312,15 +396,18 @@ var CFG=loadCfg(), DATA=null, DATES=[], CONF={}, SST=null, SEL=null, SW_REG=null
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
 
 /* ================= render: statické texty ================= */
+function appTitle(){ var b=CFG.mode==="ws"?(CFG.lang==="de"?"Windsurf-Check":"Windsurf check")
+                                      :(CFG.lang==="de"?"Kite-Check":"Kite check"); return b; }
 function applyLang(){
   var t=T[CFG.lang], m=trm();
+  document.getElementById("apptitle").textContent=appTitle();
+  document.title=appTitle();
   var gearList=CFG.gear[CFG.mode].map(function(g){return g.s;}).join("/")+" "+m.u;
   document.getElementById("subline").textContent=fmt(t.sub,{w:CFG.weight,gear:m.gear,list:gearList});
   var lm=document.getElementById("loadmsg"); if(lm) lm.textContent=t.load;
   document.getElementById("legtitle").textContent=t.legT;
   document.getElementById("legar").textContent=document.getElementById("legbody").classList.contains("hid")?t.show:t.hide;
   document.querySelectorAll("#langseg span").forEach(function(s){s.classList.toggle("on",s.dataset.l===CFG.lang);});
-  document.querySelectorAll("#modeseg span").forEach(function(s){s.classList.toggle("on",s.dataset.m===CFG.mode);});
   var lb=document.getElementById("legbody");
   lb.innerHTML='<div class="legrow">'+
     '<span><span class="sw" style="border-color:var(--go);background:rgba(79,208,160,.10)"></span><b>'+t.verd.go+'</b></span>'+
@@ -330,7 +417,6 @@ function applyLang(){
     '<span style="color:var(--spine)">'+t.legArw+'</span><span style="color:var(--go)">'+t.legConf+'</span></div>'+
     '<div class="gg">'+t.gloss.map(function(g){
       return '<div class="gi"><b>'+g[0]+'</b> — '+fmt(g[1],{one:m.one})+'</div>';}).join("")+'</div>';
-  refreshBrief();
 }
 
 /* ================= render: dlaždice ================= */
@@ -508,8 +594,14 @@ function load(){
 /* ================= nastavení ================= */
 function openSet(psId){
   var t=T[CFG.lang], m=trm();
-  document.getElementById("m_t").textContent=t.sT;
+  document.getElementById("m_t").textContent = psId ? spotName(psId) : t.sT;
+  document.getElementById("g_secs").style.display = psId ? "none" : "block";
+  document.getElementById("ps_sec").style.display = psId ? "block" : "none";
+  document.getElementById("savebtn").textContent=t.save;
+  if(psId){ openPS(psId); document.getElementById("ovl").classList.add("on"); return; }
   document.getElementById("m_gen").textContent=t.gen;
+  document.getElementById("m_mode").textContent=t.mode;
+  document.querySelectorAll("#modeseg span").forEach(function(sp){sp.textContent=sp.dataset.m==="kite"?t.modeK:t.modeW;sp.classList.toggle("on",sp.dataset.m===CFG.mode);});
   document.getElementById("m_home").textContent=t.home;
   document.getElementById("m_wu").textContent=t.wu;
   document.getElementById("m_wt").textContent=t.wt;
@@ -529,7 +621,20 @@ function openSet(psId){
   document.getElementById("m_ps").textContent=t.ps;
   document.getElementById("ps_d").textContent=t.psd;
   document.getElementById("ps_m").textContent=t.psm;
-  document.getElementById("savebtn").textContent=t.save;
+  document.getElementById("m_bk").textContent=t.bk;
+  document.getElementById("m_bkcap").textContent=t.bkCap;
+  document.getElementById("bk_exp").textContent=t.exp;
+  document.getElementById("bk_imp").textContent=t.imp;
+  document.getElementById("a_req").textContent=t.aReq;
+  document.getElementById("a_nh").textContent=" — "+t.aNh;
+  document.getElementById("a_llh").textContent=" — "+t.aLlh;
+  document.getElementById("a_kmh").textContent=" — "+t.aKmh;
+  document.getElementById("a_wgh").textContent=" — "+t.aWgh;
+  document.getElementById("a_dh").textContent=" — "+t.aDh;
+  document.getElementById("ps_nsec").textContent=t.nsec;
+  document.getElementById("ps_s1").textContent=t.s1;
+  document.getElementById("ps_s2").textContent=t.s2;
+  document.getElementById("ps_hint").textContent=t.psHint;
   document.getElementById("i_home").value=CFG.home;
   document.getElementById("i_w").value=CFG.weight;
   document.getElementById("i_h1").value=CFG.hStart;
@@ -537,7 +642,7 @@ function openSet(psId){
   document.getElementById("i_cape").value=CFG.cape;
   document.querySelectorAll("#unitseg span").forEach(function(s){s.classList.toggle("on",s.dataset.u===CFG.unit);});
   document.querySelectorAll("#sortseg span").forEach(function(s){s.classList.toggle("on",s.dataset.s===CFG.sort);});
-  renderGearTab(); renderSpotTab(); renderPS(psId);
+  renderGearTab(); renderSpotTab();
   document.getElementById("ovl").classList.add("on");
 }
 function closeSet(){ document.getElementById("ovl").classList.remove("on"); }
@@ -574,22 +679,107 @@ function renderSpotTab(){
   });
   document.getElementById("spottab").innerHTML=h;
 }
-function renderPS(sel){
-  var all=BASE_SPOTS.concat(CFG.added||[]);
-  var s=document.getElementById("ps_sel");
-  s.innerHTML=all.map(function(x){return '<option value="'+x.id+'"'+(x.id===sel?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
-  fillPS();
+function spotName(id){
+  var sp=BASE_SPOTS.concat(CFG.added||[]).filter(function(x){return x.id===id;})[0];
+  return sp?sp.name:id;
 }
-function fillPS(){
-  var id=document.getElementById("ps_sel").value;
+
+/* ---- růžice: interaktivní, kreslí jeden oblouk ---- */
+function drawRose(svgId, from, to, active){
+  var cx=100,cy=100,R=76;
+  function pt(d,r){var a=(d-90)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+  function arc(a0,a1,r,c,o){var lg=((a1-a0+360)%360)>180?1:0,p0=pt(a0,r),p1=pt(a1,r);
+    return '<path d="M'+cx+','+cy+' L'+p0[0].toFixed(1)+','+p0[1].toFixed(1)+' A'+r+','+r+' 0 '+lg+' 1 '+p1[0].toFixed(1)+','+p1[1].toFixed(1)+' Z" fill="'+c+'" opacity="'+o+'"/>';}
+  var svg='';
+  if(from!=null&&to!=null) svg+=arc(from,to,R,'#4FD0A0',0.24);
+  svg+='<circle cx="100" cy="100" r="76" fill="none" stroke="#2A4A70"/>';
+  [["S",0],["V",90],["J",180],["Z",270]].forEach(function(l){var o=pt(l[1],R+2),i=pt(l[1],R-8),tt=pt(l[1],R+13);
+    svg+='<line x1="'+o[0]+'" y1="'+o[1]+'" x2="'+i[0]+'" y2="'+i[1]+'" stroke="#4E6E90"/>';
+    svg+='<text x="'+tt[0]+'" y="'+(tt[1]+3)+'" text-anchor="middle" font-size="10" class="'+(l[0]==="S"?"lbl-n":"")+'">'+l[0]+'</text>';});
+  if(from!=null){var p=pt(from,R);svg+='<line x1="100" y1="100" x2="'+p[0].toFixed(1)+'" y2="'+p[1].toFixed(1)+'" stroke="#DCE8F5" stroke-dasharray="3 2" opacity="0.7"/>';}
+  if(to!=null){var q=pt(to,R);svg+='<line x1="100" y1="100" x2="'+q[0].toFixed(1)+'" y2="'+q[1].toFixed(1)+'" stroke="#DCE8F5" stroke-dasharray="3 2" opacity="0.7"/>';}
+  document.getElementById(svgId).innerHTML=svg;
+}
+/* stav per-spot editoru */
+var PS={ id:null, n:1, secs:[[null,null],[null,null]], click:[0,0] };
+function angleFromEvent(svg,e){
+  var r=svg.getBoundingClientRect();
+  var x=(e.clientX-r.left)/r.width*200-100, y=(e.clientY-r.top)/r.height*200-100;
+  var a=Math.atan2(y,x)*180/Math.PI+90; a=(a+360)%360;
+  return Math.round(a/5)*5%360;
+}
+function psSync(){
+  var parts=[];
+  for(var i=0;i<PS.n;i++){ var sc=PS.secs[i]; if(sc[0]!=null&&sc[1]!=null) parts.push(sc[0]+"-"+sc[1]); }
+  document.getElementById("ps_dirs").value=parts.join(",");
+  drawRose("rose1",PS.secs[0][0],PS.secs[0][1]);
+  if(PS.n===2) drawRose("rose2",PS.secs[1][0],PS.secs[1][1]);
+}
+function psFromText(){
+  var d=parseDirs(document.getElementById("ps_dirs").value);
+  PS.secs=[[null,null],[null,null]];
+  if(d){ d.slice(0,2).forEach(function(a,i){PS.secs[i]=[a[0],a[1]];}); PS.n=d.length>1?2:1; }
+  else PS.n=1;
+  setNsec(PS.n,true);
+}
+function setNsec(n,skipSync){
+  PS.n=n;
+  document.querySelectorAll("#secseg span").forEach(function(sp){sp.classList.toggle("on",+sp.dataset.n===n);});
+  document.getElementById("rose2").style.display=n===2?"":"none";
+  if(!skipSync) psSync(); else { drawRose("rose1",PS.secs[0][0],PS.secs[0][1]); if(n===2)drawRose("rose2",PS.secs[1][0],PS.secs[1][1]); }
+}
+function roseClick(idx,e){
+  var a=angleFromEvent(document.getElementById(idx===0?"rose1":"rose2"),e);
+  if(PS.click[idx]===0){ PS.secs[idx][0]=a; PS.secs[idx][1]=null; PS.click[idx]=1; }
+  else { PS.secs[idx][1]=a; PS.click[idx]=0; }
+  psSync();
+}
+function openPS(id){
+  PS.id=id; PS.click=[0,0];
+  document.getElementById("ps_id").value=id;
   var base=BASE_SPOTS.concat(CFG.added||[]).filter(function(x){return x.id===id;})[0]||{};
   var o=(CFG.ov||{})[id]||{};
   var dirs=o.dirs!==undefined?o.dirs:base.dirs;
   document.getElementById("ps_dirs").value=dirs?dirs.map(function(x){return x[0]+"-"+x[1];}).join(","):"";
-  document.getElementById("ps_min").value=o.min!=null?o.min:6.0;
+  document.getElementById("ps_min").value=o.min!=null?o.min:(base.min!=null?base.min:6.0);
   document.getElementById("ps_wg").value=o.wg!==undefined?(o.wg||""):(base.wg||"");
+  psFromText();
 }
-function collectAndSave(){
+
+function renderGearTab(){
+  var t=T[CFG.lang], g=CFG.gear[CFG.mode];
+  var h='<tr><th>'+t.gcol[0]+' ('+trm().u+')</th><th>'+t.gcol[1]+'</th><th>'+t.gcol[2]+'</th><th>'+t.gcol[3]+'</th><th></th></tr>';
+  g.forEach(function(x,i){
+    h+='<tr><td><input class="inp" data-g="'+i+'" data-k="s" value="'+esc(x.s)+'"></td>'+
+       '<td><input class="inp" data-g="'+i+'" data-k="f" type="number" step="0.5" value="'+x.f+'"></td>'+
+       '<td><input class="inp" data-g="'+i+'" data-k="t" type="number" step="0.5" value="'+x.t+'"></td>'+
+       '<td class="stc">'+"\u2605".repeat(i+1)+'</td>'+
+       '<td class="rm" data-rm="'+i+'">'+(g.length>1?'\u2715':'')+'</td></tr>';
+  });
+  document.getElementById("geartab").innerHTML=h;
+}
+function renderSpotTab(){
+  var t=T[CFG.lang];
+  var all=BASE_SPOTS.concat(CFG.added||[]);
+  if(CFG.sort==="custom"&&(CFG.order||[]).length)
+    all.sort(function(a,b){var ia=CFG.order.indexOf(a.id),ib=CFG.order.indexOf(b.id);return (ia<0?99:ia)-(ib<0?99:ib);});
+  var h='<tr><th></th><th>'+t.name+'</th><th>km</th><th>'+t.dirs+'</th><th></th><th></th><th></th></tr>';
+  all.forEach(function(sp){
+    var o=(CFG.ov||{})[sp.id]||{};
+    var dirs=o.dirs!==undefined?o.dirs:sp.dirs;
+    var hid=(CFG.hidden||{})[sp.id];
+    var added=(CFG.added||[]).some(function(a){return a.id===sp.id;});
+    h+='<tr class="'+(hid?'off':'')+'">'+
+      '<td><span class="ic" data-up="'+sp.id+'">\u25B2</span><span class="ic" data-dn="'+sp.id+'">\u25BC</span></td>'+
+      '<td class="nm">'+esc(sp.name)+'</td><td class="mono">'+(o.km!==undefined?o.km:sp.km)+'</td>'+
+      '<td class="mono">'+(dirsToStr(dirs)||"\u2014")+'</td>'+
+      '<td><span class="ic" data-cfg="'+sp.id+'">\u2699</span></td>'+
+      '<td><span class="ic" data-eye="'+sp.id+'">'+(hid?'\uD83D\uDEAB':'\uD83D\uDC41')+'</span></td>'+
+      '<td>'+(added?'<span class="ic" data-del="'+sp.id+'">\u2715</span>':'')+'</td></tr>';
+  });
+  document.getElementById("spottab").innerHTML=h;
+}
+function collectGlobal(){
   CFG.home=document.getElementById("i_home").value||CFG.home;
   CFG.weight=+document.getElementById("i_w").value||CFG.weight;
   CFG.hStart=Math.max(0,Math.min(23,+document.getElementById("i_h1").value||6));
@@ -597,32 +787,38 @@ function collectAndSave(){
   CFG.cape=+document.getElementById("i_cape").value||1500;
   var g=CFG.gear[CFG.mode];
   document.querySelectorAll("#geartab input").forEach(function(inp){
-    var i=+inp.dataset.g,k=inp.dataset.k;
-    if(g[i]) g[i][k]= k==="s"?inp.value:(+inp.value||g[i][k]);
+    var i=+inp.dataset.g,k=inp.dataset.k; if(g[i]) g[i][k]= k==="s"?inp.value:(+inp.value||g[i][k]);
   });
   g.sort(function(a,b){return a.f-b.f;});
   CFG.starTh=starThFor(g.length);
-  var id=document.getElementById("ps_sel").value;
-  if(id){
-    if(!CFG.ov)CFG.ov={};
-    var o=CFG.ov[id]||{};
-    o.dirs=parseDirs(document.getElementById("ps_dirs").value);
-    var mn=+document.getElementById("ps_min").value; if(mn)o.min=mn;
-    var wg=document.getElementById("ps_wg").value.trim(); o.wg=wg?+wg:null;
-    CFG.ov[id]=o;
-  }
+}
+function collectPS(){
+  var id=document.getElementById("ps_id").value; if(!id) return;
+  if(!CFG.ov)CFG.ov={};
+  var o=CFG.ov[id]||{};
+  o.dirs=parseDirs(document.getElementById("ps_dirs").value);
+  var mn=+document.getElementById("ps_min").value; if(mn)o.min=mn;
+  var wg=document.getElementById("ps_wg").value.trim(); o.wg=wg?+wg:null;
+  CFG.ov[id]=o;
+}
+function collectAndSave(){
+  if(document.getElementById("ps_sec").style.display!=="none") collectPS();
+  else collectGlobal();
   saveCfg(CFG); closeSet(); load();
 }
 
 /* ================= události ================= */
 document.getElementById("gearbtn").onclick=function(){openSet(null);};
+document.getElementById("modeseg").addEventListener("click",function(e){var m=e.target.dataset.m;if(!m)return;CFG.mode=m;CFG.starTh=starThFor(CFG.gear[m].length);document.querySelectorAll("#modeseg span").forEach(function(sp){sp.classList.toggle("on",sp.dataset.m===m);});renderGearTab();document.getElementById("m_gear").textContent=CFG.mode==="kite"?T[CFG.lang].gearK:T[CFG.lang].gearW;document.getElementById("addgear").textContent=fmt(T[CFG.lang].addG,{one:trm().one});document.getElementById("apptitle").textContent=appTitle();document.title=appTitle();var m=trm();document.getElementById("subline").textContent=fmt(T[CFG.lang].sub,{w:CFG.weight,gear:m.gear,list:CFG.gear[CFG.mode].map(function(x){return x.s;}).join("/")+" "+m.u});});
+document.getElementById("secseg").addEventListener("click",function(e){var n=+e.target.dataset.n;if(!n)return;setNsec(n);});
+document.getElementById("rose1").addEventListener("click",function(e){roseClick(0,e);});
+document.getElementById("rose2").addEventListener("click",function(e){roseClick(1,e);});
+document.getElementById("ps_dirs").addEventListener("input",psFromText);
+document.getElementById("bk_exp").onclick=function(){var ta=document.getElementById("bk");ta.value=JSON.stringify(CFG);ta.select();try{document.execCommand("copy");}catch(e){}document.getElementById("bk_note").textContent=T[CFG.lang].bkOk;};
+document.getElementById("bk_imp").onclick=function(){try{var c=JSON.parse(document.getElementById("bk").value);if(c&&c.gear){CFG=c;saveCfg(CFG);document.getElementById("bk_note").textContent=T[CFG.lang].bkOk;closeSet();applyLang();load();}}catch(e){document.getElementById("bk_note").textContent="?";}};
 document.getElementById("savebtn").onclick=collectAndSave;
 document.getElementById("langseg").addEventListener("click",function(e){
   var l=e.target.dataset.l; if(!l)return; CFG.lang=l; saveCfg(CFG); render();
-});
-document.getElementById("modeseg").addEventListener("click",function(e){
-  var m=e.target.dataset.m; if(!m)return; CFG.mode=m;
-  CFG.starTh=starThFor(CFG.gear[m].length); saveCfg(CFG); render();
 });
 document.getElementById("unitseg").addEventListener("click",function(e){
   var u=e.target.dataset.u; if(!u)return; CFG.unit=u;
@@ -644,18 +840,27 @@ document.getElementById("geartab").addEventListener("click",function(e){
 });
 document.getElementById("addspotbtn").onclick=function(){document.getElementById("addform").classList.toggle("on");};
 document.getElementById("f_ok").onclick=function(){
-  var nm=document.getElementById("f_name").value.trim();
-  var la=+document.getElementById("f_lat").value, lo=+document.getElementById("f_lon").value;
-  if(!nm||!la||!lo) return;
+  var fn=document.getElementById("f_name"), fla=document.getElementById("f_lat"), flo=document.getElementById("f_lon");
+  var nm=fn.value.trim(), la=parseFloat(fla.value), lo=parseFloat(flo.value);
+  [fn,fla,flo].forEach(function(x){x.classList.remove("bad");});
+  var bad=false;
+  if(!nm){fn.classList.add("bad");bad=true;}
+  if(isNaN(la)){fla.classList.add("bad");bad=true;}
+  if(isNaN(lo)){flo.classList.add("bad");bad=true;}
+  var err=document.getElementById("f_err");
+  if(bad){ err.textContent=T[CFG.lang].aErr; err.style.display="block"; return; }
+  err.style.display="none";
   var id="u_"+nm.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,10)+Date.now()%1000;
   (CFG.added=CFG.added||[]).push({id:id,name:nm,sub:"",km:+document.getElementById("f_km").value||0,
     wg:+document.getElementById("f_wg").value||null,lat:la,lon:lo,
     dirs:parseDirs(document.getElementById("f_dirs").value)});
+  fn.value="";fla.value="";flo.value="";document.getElementById("f_km").value="";document.getElementById("f_wg").value="";document.getElementById("f_dirs").value="";
   document.getElementById("addform").classList.remove("on");
-  renderSpotTab(); renderPS(id);
+  renderSpotTab();
 };
 document.getElementById("spottab").addEventListener("click",function(e){
   var d=e.target.dataset;
+  if(d.cfg){ collectGlobal(); saveCfg(CFG); openSet(d.cfg); return; }
   if(d.eye){ CFG.hidden=CFG.hidden||{}; CFG.hidden[d.eye]=!CFG.hidden[d.eye]; renderSpotTab(); }
   if(d.del){ CFG.added=(CFG.added||[]).filter(function(a){return a.id!==d.del;}); renderSpotTab(); }
   if(d.up||d.dn){
@@ -667,7 +872,6 @@ document.getElementById("spottab").addEventListener("click",function(e){
     if(j>=0&&j<ord.length){ var tmp=ord[i];ord[i]=ord[j];ord[j]=tmp; CFG.order=ord; renderSpotTab(); }
   }
 });
-document.getElementById("ps_sel").onchange=fillPS;
 document.getElementById("out").addEventListener("click",function(e){
   var cog=e.target.closest(".scog");
   if(cog){ e.stopPropagation(); openSet(cog.dataset.ps); return; }
@@ -679,27 +883,8 @@ document.getElementById("legbtn").onclick=function(){
   document.getElementById("legar").textContent=b.classList.contains("hid")?T[CFG.lang].show:T[CFG.lang].hide;
 };
 
-/* ================= PWA + ranní přehled ================= */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").then(function(r){SW_REG=r;refreshBrief();}).catch(function(){});
-}
-function refreshBrief(){
-  var t=T[CFG.lang];
-  var txt=document.getElementById("brieftxt"),b1=document.getElementById("briefbtn"),b2=document.getElementById("brieftest");
-  b1.textContent=t.on; b2.textContent=t.test;
-  if(!("Notification"in window)||!("serviceWorker"in navigator)){txt.textContent=t.briefNo;b1.style.display="none";b2.style.display="none";return;}
-  if(Notification.permission==="granted"){
-    txt.textContent=t.briefOn;b1.style.display="none";b2.style.display="";
-    if(SW_REG&&SW_REG.periodicSync)SW_REG.periodicSync.register("kite-morning",{minInterval:12*60*60*1000}).catch(function(){});
-  } else if(Notification.permission==="denied"){txt.textContent=t.briefDenied;b1.style.display="none";b2.style.display="none";}
-  else {txt.textContent=t.briefOff;b1.style.display="";b2.style.display="none";}
-}
-document.getElementById("briefbtn").onclick=function(){
-  if("Notification"in window)Notification.requestPermission().then(refreshBrief);
-};
-document.getElementById("brieftest").onclick=function(){
-  if(SW_REG&&SW_REG.active)SW_REG.active.postMessage("run-brief");
-};
+/* ================= PWA (jen offline cache) ================= */
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }
 
 applyLang(); load();
 </script>

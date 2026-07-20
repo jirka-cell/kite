@@ -20,8 +20,10 @@ var BASE_SPOTS = [
    lat:47.8661, lon:16.8348, dirs:null },
  { id:"rugen",   name:"Rügen",          sub:"Suhrendorf, DE",      km:500, wg:665105,
    lat:54.4676, lon:13.1383, dirs:null, sea:true },
+ { id:"roseng",  name:"Rosengarten",    sub:"Greifswalder Bodden, DE", km:555, wg:null,
+   lat:54.2650, lon:13.3960, dirs:[[45,160]], sea:true },
  { id:"garda",   name:"Lago di Garda",  sub:"Navene, IT",          km:620, wg:null,
-   lat:45.7900, lon:10.8000, dirs:[[320,40],[150,210]],
+   lat:45.7900, lon:10.8000, dirs:[[320,40],[150,210]], min:5.0,
    model:"meteofrance_seamless",
    verify:"https://www.windy.com/45.790/10.800?arome,45.790,10.800,11" }
 ];
@@ -145,11 +147,9 @@ function assess(day, spot, cfg){
 }
 
 /* ---- shoda modelů: rozptyl denních průměrů ---- */
-function confidence(means){
-  var vs=[]; for(var k in means) if(means[k]!=null) vs.push(means[k]);
-  if(vs.length<2) return null;
-  var spread=Math.max.apply(null,vs)-Math.min.apply(null,vs);
-  return spread<1.5?"high":spread<3?"med":"low";
+function confidence(meanHourlySpread){
+  if(meanHourlySpread==null) return null;
+  return meanHourlySpread<1.5?"high":meanHourlySpread<3?"med":"low";
 }
 
 function compassP(d,lang){
@@ -196,41 +196,25 @@ function parseLoc(loc){
   return {days:days,sunset:sunset};
 }
 function parseConfLoc(loc,cfg){
+  /* Průměrný HODINOVÝ rozptyl mezi modely. Denní průměry by schovaly
+     případ, kdy se modely shodnou na síle, ale rozejdou v načasování
+     (Garda: Pelér vs. Ora). */
   if(!loc||!loc.hourly||!loc.hourly.time) return {};
-  var h=loc.hourly, out={};
+  var h=loc.hourly, acc={};
   var keys=Object.keys(h).filter(function(k){return k.indexOf("wind_speed_10m_")===0;});
+  if(keys.length<2) return {};
   h.time.forEach(function(t,i){
     var d=t.slice(0,10), hr=+t.slice(11,13);
     if(hr<cfg.hStart||hr>cfg.hEnd) return;
-    if(!out[d]) out[d]={};
-    keys.forEach(function(k){
-      if(!out[d][k]) out[d][k]={s:0,n:0};
-      var v=h[k][i]; if(v!=null){ out[d][k].s+=v; out[d][k].n++; }
-    });
+    var vs=[]; keys.forEach(function(k){ var v=h[k][i]; if(v!=null) vs.push(v); });
+    if(vs.length<2) return;
+    var sp=Math.max.apply(null,vs)-Math.min.apply(null,vs);
+    if(!acc[d]) acc[d]={s:0,n:0};
+    acc[d].s+=sp; acc[d].n++;
   });
   var res={};
-  for(var d in out){ res[d]={}; for(var k in out[d]) res[d][k]= out[d][k].n?out[d][k].s/out[d][k].n:null; }
+  for(var d in acc) res[d]= acc[d].n ? acc[d].s/acc[d].n : null;
   return res;
-}
-
-/* ---- ranní přehled (SW, výchozí čeština) ---- */
-function morningSummary(dataBySpot, dates, spots, cfg){
-  cfg = cfg||DEFAULT_CFG;
-  for(var di=0; di<Math.min(2,dates.length); di++){
-    var best=null, bs=null;
-    spots.forEach(function(s,i){
-      var a=assess((dataBySpot[i]||{})[dates[di]]||[], s, cfg);
-      if(a&&a.v==="go"&&(!best||a.score>best.score)){ best=a; bs=s; }
-    });
-    if(best){
-      var w=best.runs[0];
-      return { ride:true,
-        title: bs.name+" "+"★".repeat(w.st)+" — "+(di===0?"dnes":"zítra"),
-        text: w.from+"–"+w.to+"h · "+w.mean.toFixed(1)+" m/s · "+compassP(w.dir,"cs")+
-              " · "+w.g+" m² · "+bs.km+" km" };
-    }
-  }
-  return { ride:false };
 }
 
 if(typeof module!=="undefined") module.exports={BASE_SPOTS:BASE_SPOTS,DEFAULT_CFG:DEFAULT_CFG,
@@ -238,4 +222,4 @@ if(typeof module!=="undefined") module.exports={BASE_SPOTS:BASE_SPOTS,DEFAULT_CF
   dirsToStr:dirsToStr,starThFor:starThFor,stars:stars,pickGear:pickGear,convW:convW,
   unitLbl:unitLbl,convT:convT,assess:assess,confidence:confidence,compassP:compassP,
   urlMain:urlMain,urlModel:urlModel,urlConf:urlConf,urlMarine:urlMarine,
-  parseLoc:parseLoc,parseConfLoc:parseConfLoc,morningSummary:morningSummary};
+  parseLoc:parseLoc,parseConfLoc:parseConfLoc};
