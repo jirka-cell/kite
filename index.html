@@ -3,351 +3,705 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kite check</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<meta name="theme-color" content="#101821">
+<meta name="theme-color" content="#0B2545">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <script src="./scoring.js"></script>
-<title>Kite check</title>
 <style>
   :root{
-    --bg:#101821; --panel:#16202B; --panelHi:#1B2836; --line:#263343;
-    --text:#D6E0EA; --muted:#728398; --dim:#4A5967;
-    --go:#35C08A; --mar:#D9A441; --storm:#E05B45;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --bg:#0B2545; --panel:#0F2E52; --line:#2A4A70;
+    --text:#DCE8F5; --muted:#7C9AB8; --dim:#4E6E90;
+    --accent:#F5C542; --go:#4FD0A0; --mar:#E8974A; --storm:#FF7A6B; --spine:#8FD0FF;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
-  *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
-  body{padding:20px 16px 50px}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:18px 14px 50px;
+       background-image:linear-gradient(rgba(143,208,255,.03) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(143,208,255,.03) 1px,transparent 1px);
+       background-size:22px 22px}
   .wrap{max-width:1240px;margin:0 auto}
-
-  .head{display:flex;justify-content:space-between;align-items:baseline;
-        gap:16px;flex-wrap:wrap;margin-bottom:5px}
-  h1{margin:0;font-size:15px;letter-spacing:.18em;font-weight:700;text-transform:uppercase}
-  .prof{font-family:var(--mono);font-size:10px;color:var(--muted)}
-  .legend{margin:0 0 20px;font-size:11px;color:var(--muted);line-height:1.6;max-width:760px}
-  .legend b{color:var(--text);font-weight:600}
-
-  .key{display:flex;gap:16px;flex-wrap:wrap;margin:0 0 18px;font-size:10.5px;
-       color:var(--muted);font-family:var(--mono)}
-  .key span{display:flex;align-items:center;gap:6px}
-  .key i{width:16px;height:9px;border-radius:2px;border:1px solid var(--line);flex-shrink:0}
-  .key i.k-go{background:#13241E;border-color:#2E8C68;border-left:3px solid var(--go)}
-  .key i.k-mar{background:#221D13;border-color:#8C6B2E;border-left:3px solid var(--mar)}
-  .key i.k-storm{background:#221412;border-color:#8C4034;border-left:3px solid var(--storm)}
-  .key i.k-nic{background:var(--panel);border-left:3px solid var(--dim)}
-  .key i.k-none{display:none}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:10px}
-
-  .tile{background:var(--panel);border:1px solid var(--line);border-radius:4px;
-        border-left:3px solid var(--dim);padding:12px 13px;cursor:pointer;
-        transition:background .12s, box-shadow .12s}
-  .tile:hover{background:var(--panelHi)}
-  .tile.sel{outline:1px solid var(--muted);outline-offset:-1px}
-
-  /* rámeček = verdikt nejlepšího ze 4 dnů, čitelný periferně */
-  .tile.jede{border-color:#2E8C68;border-left-color:var(--go);background:#13241E;
-             box-shadow:inset 0 0 0 1px rgba(53,192,138,.10)}
-  .tile.jede:hover{background:#172C24}
-  .tile.hranicni{border-color:#8C6B2E;border-left-color:var(--mar);background:#221D13;
-             box-shadow:inset 0 0 0 1px rgba(217,164,65,.10)}
-  .tile.hranicni:hover{background:#2A2418}
-  .tile.boure{border-color:#8C4034;border-left-color:var(--storm);background:#221412;
-             box-shadow:inset 0 0 0 1px rgba(224,91,69,.10)}
-  .tile.boure:hover{background:#2A1916}
-
-  .th{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .tn{font-size:13.5px;font-weight:650;letter-spacing:.01em}
-  .ts{font-size:9.5px;color:var(--muted);margin-top:1px}
-  .tkm{font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap}
-
-  .days{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:11px 0 0}
-  .day{text-align:center}
-  .dlab{font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:3px}
-  .day svg{width:100%;height:auto;display:block}
-  .dk{font-family:var(--mono);font-size:11px;margin-top:4px;color:var(--dim)}
-  .dk.go{color:var(--go)} .dk.mar{color:var(--mar)} .dk.storm{color:var(--storm)}
-  .stars{letter-spacing:.5px}
-  .stars .e{opacity:.20}
-  .dk .gustup{color:var(--mar);font-size:9px;vertical-align:top;margin-left:1px}
-
-  .best{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:9px;
-        padding-top:8px;border-top:1px solid #1C2733;line-height:1.7}
-  .best .lead{color:var(--text)}
-  .w-mar{color:var(--mar)} .w-storm{color:var(--storm)} .w-go{color:var(--go)}
-  .flag{font-size:9.5px;color:var(--mar);margin-top:6px;line-height:1.5}
-  .flag.dim{color:var(--dim)}
-
-  /* --- WG panel --- */
-  #wgwrap{margin-top:22px;background:var(--panel);border:1px solid var(--line);
-          border-radius:4px;padding:13px;display:none}
-  #wgwrap h2{margin:0 0 3px;font-size:12px;font-weight:650}
-  #wgwrap .sub{font-size:10px;color:var(--muted);margin-bottom:10px}
-  #wgslot{background:#fff;border-radius:3px;min-height:60px}
-  #wgnote{font-size:11px;color:var(--muted);line-height:1.6;padding:14px;
-          font-family:var(--mono);font-size:10px}
-
-  .msg{font-family:var(--mono);font-size:11px;color:var(--muted);padding:24px}
-  .err{border:1px solid var(--storm);border-radius:4px;padding:14px;font-size:12px;line-height:1.6}
-  .foot{font-size:10px;color:var(--dim);line-height:1.7;margin-top:22px;max-width:820px}
-  code{color:var(--mar);font-family:var(--mono)}
-  button.rl{background:none;border:1px solid var(--line);color:var(--muted);
-    font-family:var(--mono);font-size:10px;padding:5px 9px;border-radius:3px;
-    cursor:pointer;margin-top:9px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+  h1{font-size:16px;letter-spacing:.2em;text-transform:uppercase;font-weight:800;color:var(--accent)}
+  .tools{display:flex;gap:8px;align-items:center}
+  .gear{width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+        display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--accent);font-size:17px}
+  .sub{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:14px}
+  .brief{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:9px 12px;
+         background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:11px;color:var(--muted)}
+  button.rl{background:none;border:1px solid var(--line);color:var(--muted);font-family:var(--mono);
+    font-size:10px;padding:5px 9px;border-radius:3px;cursor:pointer}
   button.rl:hover{color:var(--text)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+  .spot{background:var(--panel);border:1px solid var(--line);border-radius:6px;border-left-width:3px;
+        padding:11px 11px 12px;cursor:pointer;border-left-color:var(--dim)}
+  .spot.go{border-left-color:var(--go);box-shadow:inset 0 0 0 1px rgba(79,208,160,.10)}
+  .spot.mar{border-left-color:var(--mar);box-shadow:inset 0 0 0 1px rgba(232,151,74,.10)}
+  .spot.storm{border-left-color:var(--storm)}
+  .shead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .sname{font-size:14px;font-weight:700;color:var(--accent)}
+  .ssub{font-size:9.5px;color:var(--muted);margin-top:1px}
+  .smeta{font-family:var(--mono);font-size:10px;color:var(--muted);text-align:right;line-height:1.5;white-space:nowrap}
+  .scog{color:var(--dim);cursor:pointer;font-size:13px;margin-left:6px}
+  .scog:hover{color:var(--accent)}
+
+  .day{border:1px solid var(--line);border-left-width:3px;border-radius:4px;padding:6px 7px 4px;margin-bottom:6px;border-left-color:var(--dim)}
+  .day.go{border-left-color:var(--go);background:rgba(79,208,160,.05)}
+  .day.mar{border-left-color:var(--mar);background:rgba(232,151,74,.05)}
+  .day.storm{border-left-color:var(--storm);background:rgba(255,122,107,.05)}
+  .dhead{display:flex;align-items:baseline;gap:7px;margin-bottom:4px}
+  .dname{font-family:var(--mono);font-size:10px;color:var(--text);font-weight:600}
+  .conf{font-size:11px;line-height:1}
+  .dverd{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-left:auto}
+  .dverd.go{color:var(--go)} .dverd.mar{color:var(--mar)} .dverd.storm{color:var(--storm)} .dverd.nic{color:var(--dim)}
+
+  .hours{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1px;align-items:end}
+  .hr{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+  .shw{font-size:8px;height:9px;line-height:1}
+  .hv{font-family:var(--mono);font-size:6.5px;color:var(--spine);height:8px;opacity:.9}
+  .bar{width:100%;display:flex;align-items:flex-end;justify-content:center;height:26px;position:relative}
+  .bar .w{width:62%;border-radius:1px 1px 0 0}
+  .bar .g{position:absolute;width:62%;left:19%;border-top:1px solid var(--spine);opacity:.5}
+  .arw{font-size:9px;line-height:1;color:var(--spine);opacity:.9}
+  .stk{display:flex;flex-direction:column-reverse;height:auto;font-size:9px;line-height:.95}
+  .hlab{font-family:var(--mono);font-size:7.5px;color:var(--dim);height:9px}
+  .dfoot{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;padding-top:4px;
+         border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+  .dfoot b{color:var(--text)}
+
+  #wgwrap{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:none}
+  #wgwrap h2{font-size:12px;font-weight:650;color:var(--accent);margin-bottom:2px}
+  #wgwrap .c{font-size:10px;color:var(--muted);margin-bottom:9px}
+  #wgslot{background:#fff;border-radius:3px;min-height:50px}
+  #wgslot .lk{background:var(--panel);padding:14px;font-size:12px}
+  #wgslot .lk a{color:var(--spine)}
+
+  .legwrap{margin-top:16px}
+  .legbtn{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:6px;color:var(--text);
+    font-size:12px;padding:11px 13px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .legbtn .ar{color:var(--accent);font-family:var(--mono)}
+  .legbody{background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 6px 6px;
+    padding:13px 15px;margin-top:-1px}
+  .legbody.hid{display:none}
+  .legrow{display:flex;gap:8px 16px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--muted);
+    padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid var(--line)}
+  .legrow .sw{width:13px;height:13px;border-radius:3px;border:1px solid var(--line);border-left-width:3px;display:inline-block;vertical-align:-2px;margin-right:5px}
+  .legrow b{color:var(--text)}
+  .gg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px 20px}
+  .gi{font-size:11px;color:var(--muted);line-height:1.45}.gi b{color:var(--text)}
+
+  /* ---- modal nastavení ---- */
+  #ovl{position:fixed;inset:0;background:rgba(4,12,24,.7);display:none;z-index:50;overflow:auto;padding:24px 12px}
+  #ovl.on{display:block}
+  .modal{max-width:760px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+  .mhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .mhead h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+  .x{cursor:pointer;color:var(--muted);font-size:18px}
+  .sec{border-top:1px solid var(--line);padding:12px 0}
+  .sec h3{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0}
+  .lbl{font-size:12px;color:var(--text)}.lbl small{display:block;color:var(--muted);font-size:10px}
+  .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;flex-shrink:0}
+  .seg span{font-family:var(--mono);font-size:10px;padding:4px 9px;color:var(--muted);cursor:pointer}
+  .seg span.on{background:var(--accent);color:#0B2545;font-weight:700}
+  input.inp{font-family:var(--mono);font-size:11px;color:var(--text);border:1px solid var(--line);
+    border-radius:3px;padding:4px 8px;background:var(--bg);width:90px;text-align:right}
+  input.inp.wide{width:150px;text-align:left}
+  table.gt{width:100%;border-collapse:collapse}
+  table.gt th{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--muted);text-align:left;padding:3px 5px;font-weight:600}
+  table.gt td{padding:4px 5px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px}
+  table.gt .stc{color:var(--go);letter-spacing:1px}
+  table.gt .rm{color:var(--dim);cursor:pointer}.gt .rm:hover{color:var(--storm)}
+  table.gt input.inp{width:64px}
+  .addb{margin-top:8px;width:100%;border:1px dashed var(--line);background:transparent;color:var(--accent);
+    font-family:var(--mono);font-size:11px;padding:7px;border-radius:5px;cursor:pointer}
+  table.sp{width:100%;border-collapse:collapse}
+  table.sp th{font-family:var(--mono);font-size:9px;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;font-weight:600}
+  table.sp td{padding:6px;border-top:1px solid var(--line);font-size:12px;vertical-align:middle}
+  table.sp .nm{color:var(--text);font-weight:600}
+  table.sp .mono{font-family:var(--mono);color:var(--muted);font-size:11px}
+  table.sp .ic{cursor:pointer;color:var(--dim);padding:0 3px}
+  table.sp .ic:hover{color:var(--accent)}
+  table.sp .off td{opacity:.45}
+  .addform{margin-top:9px;border:1px solid var(--line);border-radius:5px;padding:10px;display:none}
+  .addform.on{display:block}
+  .addform .row{padding:4px 0}
+  .save{margin-top:12px;width:100%;background:var(--accent);border:none;color:#0B2545;font-weight:700;
+    font-family:var(--mono);font-size:12px;padding:10px;border-radius:5px;cursor:pointer}
+  .msg{font-family:var(--mono);font-size:11px;color:var(--muted);padding:22px}
+  .err{border:1px solid var(--storm);border-radius:6px;padding:13px;font-size:12px;line-height:1.6}
+  .offnote{font-family:var(--mono);font-size:10px;color:var(--mar);margin-top:9px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="head">
+  <div class="topbar">
     <h1>Kite check</h1>
-    <span class="prof">98 kg &middot; 8/12/14 m&sup2; &middot; ICON seamless</span>
+    <div class="tools">
+      <div class="seg" id="langseg"><span data-l="cs">CZ</span><span data-l="en">EN</span><span data-l="de">DE</span></div>
+      <div class="seg" id="modeseg"><span data-m="kite">kite</span><span data-m="ws" id="wslbl">windsurf</span></div>
+      <div class="gear" id="gearbtn" title="">⚙</div>
+    </div>
   </div>
-  <p class="legend">
-    Plná výplň je střední vítr, vlásek nad ní poryv. Čárkovaná čára je <b>6,0 m/s</b> —
-    pod ní ti nic z kvéru nenaplaní. <b>Osa je pevná 0–16 m/s ve všech dlaždicích</b>,
-    takže se dají porovnat okem. Šedé hodiny mají špatný směr.
-    Klikni na dlaždici → dole naskočí Windguru mix pro ověření.
-    <b>Hrana sektoru je tvrdý řez</b> — pár stupňů rozhodne. Když je dlaždice
-    „mimo jen o X°“, koukni do widgetu, ne na můj verdikt.
-    <b>Nárazovost verdikt neovlivňuje</b> — GF je jen informace. Bouřku hlídá CAPE.
-  </p>
-  <div class="key">
-    <span><i class="k-go"></i>Jede — vejde se do kvéru</span>
-    <span><i class="k-mar"></i>Hraniční — pod 6,0 m/s</span>
-    <span><i class="k-storm"></i>Konvekce — CAPE&nbsp;&gt;&nbsp;1500 nebo konv. srážky</span>
-    <span><i class="k-nic"></i>Nefouká / špatný směr</span>
-    <span><i class="k-none"></i>★ 6 · ★★ 9 · ★★★ 12&nbsp;m/s — prahy středního větru</span>
-    <span><i class="k-none"></i><span style="color:var(--mar)">↑</span> = poryvy tlačí na menší kite</span>
-  </div>
+  <div class="sub" id="subline"></div>
 
-  <div id="notifbar" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-       margin:0 0 16px;padding:10px 12px;background:var(--panel);border:1px solid var(--line);
-       border-radius:4px;font-size:11px;color:var(--muted)">
-    <span id="notiftxt">Ranní brief: vypnuto</span>
-    <button class="rl" id="notifbtn" style="margin:0" onclick="enableNotif()">Zapnout</button>
-    <button class="rl" id="testbtn" style="margin:0;display:none" onclick="testNotif()">Zkusit teď</button>
-  </div>
+  <div class="brief"><span id="brieftxt"></span>
+    <button class="rl" id="briefbtn" style="display:none"></button>
+    <button class="rl" id="brieftest" style="display:none"></button></div>
 
-  <div id="out"><div class="msg">Tahám data…</div></div>
+  <div id="out"><div class="msg" id="loadmsg"></div></div>
 
   <div id="wgwrap">
-    <h2 id="wgname"></h2>
-    <div class="sub" id="wgsub"></div>
-    <div id="wgslot"></div>
+    <h2 id="wgname"></h2><div class="c" id="wgsub"></div><div id="wgslot"></div>
   </div>
 
-  <div class="foot" id="foot"></div>
+  <div class="legwrap">
+    <button class="legbtn" id="legbtn"><span id="legtitle"></span><span class="ar" id="legar"></span></button>
+    <div class="legbody hid" id="legbody"></div>
+  </div>
 </div>
 
+<!-- NASTAVENÍ -->
+<div id="ovl"><div class="modal">
+  <div class="mhead"><h2 id="m_t"></h2><span class="x" onclick="closeSet()">✕</span></div>
+
+  <div class="sec"><h3 id="m_gen"></h3>
+    <div class="row"><div class="lbl" id="m_home"></div><input class="inp wide" id="i_home"></div>
+    <div class="row"><div class="lbl" id="m_wu"></div>
+      <div class="seg" id="unitseg"><span data-u="ms">m/s</span><span data-u="kt">kt</span><span data-u="kmh">km/h</span></div></div>
+    <div class="row"><div class="lbl" id="m_wt"></div><input class="inp" id="i_w" type="number"></div>
+    <div class="row"><div class="lbl" id="m_hrs"></div>
+      <span><input class="inp" id="i_h1" type="number" min="0" max="23" style="width:52px">–<input class="inp" id="i_h2" type="number" min="0" max="23" style="width:52px"></span></div>
+    <div class="row"><div class="lbl" id="m_cape"></div><input class="inp" id="i_cape" type="number"></div>
+    <div class="row"><div class="lbl" id="m_sort"></div>
+      <div class="seg" id="sortseg"><span data-s="wind" id="m_sw"></span><span data-s="custom" id="m_sc"></span></div></div>
+  </div>
+
+  <div class="sec"><h3 id="m_gear"></h3>
+    <div style="font-size:10px;color:var(--muted);margin-bottom:6px" id="m_gearcap"></div>
+    <table class="gt" id="geartab"></table>
+    <button class="addb" id="addgear"></button>
+  </div>
+
+  <div class="sec"><h3 id="m_spots"></h3>
+    <table class="sp" id="spottab"></table>
+    <button class="addb" id="addspotbtn"></button>
+    <div class="addform" id="addform">
+      <div class="row"><div class="lbl" id="a_n"></div><input class="inp wide" id="f_name"></div>
+      <div class="row"><div class="lbl">Lat / Lon</div>
+        <span><input class="inp" id="f_lat" style="width:74px"> <input class="inp" id="f_lon" style="width:74px"></span></div>
+      <div class="row"><div class="lbl">km</div><input class="inp" id="f_km" type="number"></div>
+      <div class="row"><div class="lbl">Windguru</div><input class="inp" id="f_wg" type="number"></div>
+      <div class="row"><div class="lbl" id="a_d"></div><input class="inp wide" id="f_dirs" placeholder="200-340"></div>
+      <button class="addb" id="f_ok"></button>
+    </div>
+  </div>
+
+  <div class="sec"><h3 id="m_ps"></h3>
+    <div class="row"><div class="lbl">Spot</div>
+      <select class="inp wide" id="ps_sel" style="text-align:left"></select></div>
+    <div class="row"><div class="lbl" id="ps_d"></div><input class="inp wide" id="ps_dirs" placeholder="45-315 / 320-40,150-210"></div>
+    <div class="row"><div class="lbl" id="ps_m"></div><input class="inp" id="ps_min" type="number" step="0.5"></div>
+    <div class="row"><div class="lbl">Windguru</div><input class="inp" id="ps_wg" type="number"></div>
+  </div>
+
+  <button class="save" id="savebtn"></button>
+</div></div>
+
 <script>
-/* ================================================================== *
- *  KONFIGURACE — tady se sahá
- * ================================================================== *
- *
- *  dirs : [od°, do°] po směru hodinových ručiček = sektor, ze kterého
- *         MUSÍ foukat. null = sektor neznám → hradbu NEUPLATŇUJI
- *         (radši žádné pravidlo než vymyšlené).
- *  guess: true = sektor je můj odhad, ne ověřený fakt.
- *  wg   : Windguru spot ID. null = nevím, doplň z widget generátoru.
- */
-var C = { go:"#35C08A", mar:"#D9A441", storm:"#E05B45", dim:"#4A5967", line:"#263343" };
-function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+/* ================= i18n ================= */
+var T={
+ cs:{sub:"{w} kg · {gear}: {list}", load:"Tahám data…", offline:"⚠ offline — poslední stažená data ({t})",
+   timeout:"spojení vypršelo (12 s) — slabý signál?", errT:"Data se nenačetla",
+   errB:" — a nemám offline zálohu.", retry:"Zkusit znovu",
+   briefOn:"Ranní přehled: zapnuto", briefOff:"Ranní přehled: vypnuto", briefNo:"Ranní přehled: prohlížeč nepodporuje",
+   briefDenied:"Ranní přehled: zakázáno v prohlížeči", on:"Zapnout", test:"Zkusit teď",
+   jede:"Jede", jede2:"Jede 2×", mar:"Hraniční", storm:"Bouřka", nowind:"Nefouká", baddir:"Špatný směr",
+   max:"max", light:"světlo do", clear:"jasno", part:"polojasno", cloud:"zataženo",
+   verd:{go:"Jede",mar:"Hraniční",storm:"Bouřka",nic:"—"},
+   wgT:"Windguru (WG mix)", wgSub:"{km} km · klepni na jiný spot pro přepnutí",
+   wgNone:"Windguru pro tento spot není — ověření přes AROME:", wgFail:"Widget se nevykreslil. Jsi online?",
+   legT:"Legenda a co které slovo znamená", show:"▾ zobrazit", hide:"▴ skrýt",
+   legBar:"sloupec = <b>vítr</b>, vlásek = <b>náraz</b>, číslo = síla", legStar:"★ síla v tu hodinu",
+   legArw:"↗ směr · 🌧 přeháňka", legConf:"● shoda předpovědí",
+   gloss:[["Náraz","nárazová špička větru. Velký rozdíl proti průměru = tahá to trhaně."],
+     ["Bouřka","prohřátý vzduch dělá přeháňky; vítr skáče a mění směr. Nejezdit."],
+     ["Sektor spotu","směry, ze kterých žene vítr na vodu. Mimo ně fouká od břehu pryč."],
+     ["Vítr od břehu","odnáší tě od pláže na otevřenou vodu. Rizikové na velkých plochách."],
+     ["Hvězdy","síla přepočtená na tvou výbavu: ★ největší {one}, plný počet nejmenší."],
+     ["Shoda předpovědí","plný puntík = modely se shodují (jistější), prázdný = ber s rezervou."]],
+   sT:"Nastavení", gen:"Obecné", home:"Odkud počítat vzdálenost", wu:"Jednotky větru",
+   wt:"Váha jezdce", hrs:"Sledované hodiny", cape:"Kdy hlásit bouřku (J/kg)",
+   sort:"Řazení spotů", sortW:"podle větru", sortC:"moje pořadí",
+   gearK:"Kvér — kity", gearW:"Plachty — windsurf",
+   gearCap:"Hvězd je tolik, kolik máš kusů. Prahy hvězd se přepočítají samy.",
+   gcol:["velikost","od","do","hvězdy"], addG:"+ Přidat {one}",
+   spots:"Spoty", addS:"+ Přidat spot", name:"Název", dirs:"Odkud fouká", okBtn:"Přidat",
+   ps:"Nastavení spotu", psd:"Odkud fouká (např. 45-315, dva sektory čárkou)", psm:"Nejnižší vítr (m/s)",
+   save:"Uložit a zavřít",
+   kite:{gear:"kity", one:"kite", u:"m²"}, ws:{gear:"plachty", one:"plachta", u:"m²"}},
+ en:{sub:"{w} kg · {gear}: {list}", load:"Loading data…", offline:"⚠ offline — last downloaded data ({t})",
+   timeout:"connection timed out (12 s) — weak signal?", errT:"Could not load data",
+   errB:" — and no offline backup yet.", retry:"Retry",
+   briefOn:"Morning brief: on", briefOff:"Morning brief: off", briefNo:"Morning brief: unsupported",
+   briefDenied:"Morning brief: blocked in browser", on:"Enable", test:"Test now",
+   jede:"Ride", jede2:"Ride 2×", mar:"Marginal", storm:"Storm", nowind:"No wind", baddir:"Wrong direction",
+   max:"max", light:"light until", clear:"clear", part:"partly cloudy", cloud:"overcast",
+   verd:{go:"Ride",mar:"Marginal",storm:"Storm",nic:"—"},
+   wgT:"Windguru (WG mix)", wgSub:"{km} km · tap another spot to switch",
+   wgNone:"No Windguru for this spot — verify via AROME:", wgFail:"Widget did not render. Online?",
+   legT:"Legend & glossary", show:"▾ show", hide:"▴ hide",
+   legBar:"bar = <b>wind</b>, whisker = <b>gust</b>, number = speed", legStar:"★ strength that hour",
+   legArw:"↗ direction · 🌧 shower", legConf:"● forecast agreement",
+   gloss:[["Gust","short spike of wind. Big gap vs average = jerky pull."],
+     ["Storm (convection)","heated air builds showers; wind jumps and shifts. Don't ride."],
+     ["Spot sector","directions that blow onto the water. Outside them it blows offshore."],
+     ["Offshore wind","carries you away from the beach onto open water. Risky on big lakes."],
+     ["Stars","wind mapped to your gear: ★ biggest {one}, full count the smallest."],
+     ["Forecast agreement","solid dot = models agree (more certain), hollow = take with caution."]],
+   sT:"Settings", gen:"General", home:"Measure distance from", wu:"Wind units",
+   wt:"Rider weight", hrs:"Watched hours", cape:"Storm alert threshold (J/kg)",
+   sort:"Spot order", sortW:"by wind", sortC:"my order",
+   gearK:"Quiver — kites", gearW:"Sails — windsurf",
+   gearCap:"You get one star per item. Star thresholds recompute automatically.",
+   gcol:["size","from","to","stars"], addG:"+ Add {one}",
+   spots:"Spots", addS:"+ Add spot", name:"Name", dirs:"Wind from", okBtn:"Add",
+   ps:"Per-spot settings", psd:"Wind from (e.g. 45-315; two sectors comma-sep)", psm:"Minimum wind (m/s)",
+   save:"Save & close",
+   kite:{gear:"kites", one:"kite", u:"m²"}, ws:{gear:"sails", one:"sail", u:"m²"}},
+ de:{sub:"{w} kg · {gear}: {list}", load:"Lade Daten…", offline:"⚠ offline — letzte Daten ({t})",
+   timeout:"Zeitüberschreitung (12 s) — schwaches Signal?", errT:"Daten konnten nicht geladen werden",
+   errB:" — und noch kein Offline-Backup.", retry:"Erneut",
+   briefOn:"Morgenbericht: an", briefOff:"Morgenbericht: aus", briefNo:"Morgenbericht: nicht unterstützt",
+   briefDenied:"Morgenbericht: im Browser blockiert", on:"Aktivieren", test:"Jetzt testen",
+   jede:"Fahrbar", jede2:"Fahrbar 2×", mar:"Grenzwertig", storm:"Gewitter", nowind:"Kein Wind", baddir:"Falsche Richtung",
+   max:"max", light:"Licht bis", clear:"klar", part:"wolkig", cloud:"bedeckt",
+   verd:{go:"Fahrbar",mar:"Grenzwertig",storm:"Gewitter",nic:"—"},
+   wgT:"Windguru (WG-Mix)", wgSub:"{km} km · anderen Spot antippen zum Wechseln",
+   wgNone:"Kein Windguru für diesen Spot — Prüfung via AROME:", wgFail:"Widget wurde nicht geladen. Online?",
+   legT:"Legende & Begriffe", show:"▾ zeigen", hide:"▴ verbergen",
+   legBar:"Balken = <b>Wind</b>, Strich = <b>Böe</b>, Zahl = Stärke", legStar:"★ Stärke der Stunde",
+   legArw:"↗ Richtung · 🌧 Schauer", legConf:"● Modell-Übereinstimmung",
+   gloss:[["Böe","kurze Windspitze. Großer Abstand zum Mittel = ruckartiger Zug."],
+     ["Gewitter (Konvektion)","erwärmte Luft bildet Schauer; Wind springt und dreht. Nicht fahren."],
+     ["Spot-Sektor","Richtungen, die aufs Wasser wehen. Außerhalb weht es ablandig."],
+     ["Ablandiger Wind","treibt dich vom Strand aufs offene Wasser. Riskant auf großen Flächen."],
+     ["Sterne","Wind auf deine Ausrüstung gerechnet: ★ größte(r) {one}, volle Zahl die kleinste."],
+     ["Modell-Übereinstimmung","voller Punkt = Modelle einig (sicherer), leer = mit Vorsicht."]],
+   sT:"Einstellungen", gen:"Allgemein", home:"Entfernung messen von", wu:"Windeinheit",
+   wt:"Fahrergewicht", hrs:"Beobachtete Stunden", cape:"Gewitterwarnung ab (J/kg)",
+   sort:"Spot-Reihenfolge", sortW:"nach Wind", sortC:"meine Reihenfolge",
+   gearK:"Quiver — Kites", gearW:"Segel — Windsurf",
+   gearCap:"Ein Stern pro Teil. Schwellen berechnen sich automatisch.",
+   gcol:["Größe","von","bis","Sterne"], addG:"+ {one} hinzufügen",
+   spots:"Spots", addS:"+ Spot hinzufügen", name:"Name", dirs:"Wind aus", okBtn:"Hinzufügen",
+   ps:"Spot-Einstellungen", psd:"Wind aus (z. B. 45-315; zwei Sektoren mit Komma)", psm:"Mindestwind (m/s)",
+   save:"Speichern & schließen",
+   kite:{gear:"Kites", one:"Kite", u:"m²"}, ws:{gear:"Segel", one:"Segel", u:"m²"}}
+};
+function tr(k){ return T[CFG.lang][k]; }
+function trm(){ return T[CFG.lang][CFG.mode]; }
+function fmt(s,o){ for(var k in o) s=s.split("{"+k+"}").join(o[k]); return s; }
 
-/* ---- páteř: pevná osa 0–SCALE_MAX ---- */
-function spine(hrs, dirs){
-  var W=100,H=34,pad=1;
-  var bw=(W-pad*2)/hrs.length;
-  function y(v){ return H-7-(Math.min(v,SCALE_MAX)/SCALE_MAX)*(H-9); }
-  var s='<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">';
-  s+='<line x1="0" x2="'+W+'" y1="'+y(MIN_RIDE)+'" y2="'+y(MIN_RIDE)+
-     '" stroke="'+C.line+'" stroke-width="0.6" stroke-dasharray="1.5 2"/>';
-  hrs.forEach(function(h,i){
-    var x=pad+i*bw+bw*0.15, w=bw*0.7, cx=x+w/2;
-    var live=inSector(h.dir,dirs);
-    var col=!live?C.dim:h.wind>=MIN_RIDE?C.go:h.wind>=MIN_MARGINAL?C.mar:C.dim;
-    s+='<line x1="'+cx+'" x2="'+cx+'" y1="'+y(h.gust)+'" y2="'+y(h.wind)+
-       '" stroke="'+col+'" stroke-width="0.5" opacity="0.5"/>';
-    s+='<rect x="'+x+'" y="'+y(h.wind)+'" width="'+w+'" height="'+(H-7-y(h.wind))+
-       '" fill="'+col+'" opacity="'+(live?0.9:0.3)+'"/>';
-  });
-  return s+'</svg>';
+/* ================= stav ================= */
+var CFG=loadCfg(), DATA=null, DATES=[], CONF={}, SST=null, SEL=null, SW_REG=null;
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
+
+/* ================= render: statické texty ================= */
+function applyLang(){
+  var t=T[CFG.lang], m=trm();
+  var gearList=CFG.gear[CFG.mode].map(function(g){return g.s;}).join("/")+" "+m.u;
+  document.getElementById("subline").textContent=fmt(t.sub,{w:CFG.weight,gear:m.gear,list:gearList});
+  var lm=document.getElementById("loadmsg"); if(lm) lm.textContent=t.load;
+  document.getElementById("legtitle").textContent=t.legT;
+  document.getElementById("legar").textContent=document.getElementById("legbody").classList.contains("hid")?t.show:t.hide;
+  document.querySelectorAll("#langseg span").forEach(function(s){s.classList.toggle("on",s.dataset.l===CFG.lang);});
+  document.querySelectorAll("#modeseg span").forEach(function(s){s.classList.toggle("on",s.dataset.m===CFG.mode);});
+  var lb=document.getElementById("legbody");
+  lb.innerHTML='<div class="legrow">'+
+    '<span><span class="sw" style="border-color:var(--go);background:rgba(79,208,160,.10)"></span><b>'+t.verd.go+'</b></span>'+
+    '<span><span class="sw" style="border-color:var(--mar);background:rgba(232,151,74,.10)"></span><b>'+t.verd.mar+'</b></span>'+
+    '<span><span class="sw" style="border-color:var(--storm);background:rgba(255,122,107,.10)"></span><b>'+t.verd.storm+'</b></span>'+
+    '<span>'+t.legBar+'</span><span style="color:var(--go)">'+t.legStar+'</span>'+
+    '<span style="color:var(--spine)">'+t.legArw+'</span><span style="color:var(--go)">'+t.legConf+'</span></div>'+
+    '<div class="gg">'+t.gloss.map(function(g){
+      return '<div class="gi"><b>'+g[0]+'</b> — '+fmt(g[1],{one:m.one})+'</div>';}).join("")+'</div>';
+  refreshBrief();
 }
 
-/* ---- render ---- */
-var DATA=null, DATES=[], SELECTED=null;
+/* ================= render: dlaždice ================= */
+function cloudTxt(c){ var t=T[CFG.lang]; return c==null?"":c<30?t.clear:c<70?t.part:t.cloud; }
 function dayName(iso){
-  var n=["Ne","Po","Út","St","Čt","Pá","So"], d=new Date(iso+"T12:00:00");
-  return n[d.getDay()]+" "+d.getDate()+".";
+  var loc=CFG.lang==="en"?"en-GB":CFG.lang==="de"?"de-DE":"cs-CZ";
+  var d=new Date(iso+"T12:00:00");
+  return d.toLocaleDateString(loc,{weekday:"short"}).replace(".","")+" "+d.getDate()+".";
 }
-
+function arrow(dir){return '<span class="arw" style="display:inline-block;transform:rotate('+((dir+180)%360)+'deg)">↑</span>';}
+function starStack(w,live,th){
+  var n=live?stars(w,th):0, col=w>=(th[1]||9)?'var(--go)':'var(--mar)';
+  var s='<span class="stk">';
+  for(var i=0;i<th.length;i++) s+='<span style="color:'+(i<n?col:'rgba(255,255,255,.07)')+'">★</span>';
+  return s+'</span>';
+}
+function lightUntil(sunsetIso){
+  if(!sunsetIso) return "";
+  var d=new Date(sunsetIso); d.setMinutes(d.getMinutes()-30);
+  return String(d.getHours())+":"+String(d.getMinutes()).padStart(2,"0");
+}
+function confDot(c){
+  if(!c) return "";
+  var m={high:["●","var(--go)"],med:["◐","var(--mar)"],low:["○","var(--storm)"]}[c];
+  return '<span class="conf" style="color:'+m[1]+'">'+m[0]+'</span>';
+}
+var MX=16;
+function dayBlock(spot,si,date,di){
+  var t=T[CFG.lang], th=CFG.starTh;
+  var rec=(DATA[si]||{days:{}}).days[date]||[];
+  var a=assess(rec,spot,CFG);
+  if(!a) return "";
+  var sunset=(DATA[si].sunset||{})[date];
+  var winH=a.hrs;
+  var cells=winH.map(function(x){
+    var live=inSector(x.dir,spot.dirs);
+    var barCol=!live?'var(--dim)':x.wind>=(spot.min!=null?spot.min:6)?'var(--spine)':x.wind>=5?'var(--mar)':'var(--dim)';
+    var hw=Math.max(2,(Math.min(x.wind,MX)/MX)*24), hg=Math.max(hw,(Math.min(x.gust,MX)/MX)*24);
+    var lab=x.hour%3===0;
+    return '<div class="hr">'+
+      '<div class="shw">'+(x.show>0.3?'🌧':'')+'</div>'+
+      '<div class="hv">'+(lab?Math.round(convW(x.wind,CFG.unit)):'')+'</div>'+
+      '<div class="bar"><div class="g" style="bottom:'+hg+'px"></div><div class="w" style="height:'+hw+'px;background:'+barCol+';opacity:'+(live?0.95:0.4)+'"></div></div>'+
+      arrow(x.dir)+starStack(x.wind,live,th)+
+      '<div class="hlab">'+(lab?x.hour:'')+'</div></div>';
+  }).join('');
+  var verd = a.v==="go" ? (a.runs.length>1?t.jede2:t.jede) : a.v==="mar"?t.mar : a.v==="storm"?t.storm
+           : (a.noWind?t.nowind:t.baddir);
+  var vc = a.v==="nic"?"nic":a.v;
+  var wind;
+  if(a.runs.length){
+    wind=a.runs.map(function(w){
+      return '<b>'+w.from+'–'+w.to+'h</b> '+convW(w.mean,CFG.unit).toFixed(1)+' '+unitLbl(CFG.unit)+
+        ' '+compassP(w.dir,CFG.lang)+(w.g?' · '+w.g+' '+trm().u:'');
+    }).join(' | ');
+  } else if(a.v==="storm"){ wind=t.storm; }
+  else { wind=t.max+' '+convW(a.peak,CFG.unit).toFixed(1)+' '+unitLbl(CFG.unit); }
+  var mid=winH[Math.floor(winH.length/2)]||{};
+  var env=[];
+  if(mid.temp!=null) env.push('🌡 '+Math.round(convT(mid.temp,CFG.tunit))+'°');
+  var ct=cloudTxt(mid.cloud); if(ct) env.push(ct);
+  var lu=lightUntil(sunset); if(lu) env.push(t.light+' '+lu);
+  var conf=(CONF[spot.id]||{})[date];
+  return '<div class="day '+vc+'"><div class="dhead"><span class="dname">'+dayName(date)+'</span>'+
+    confDot(conf)+'<span class="dverd '+vc+'">'+verd+'</span></div>'+
+    '<div class="hours">'+cells+'</div>'+
+    '<div class="dfoot"><span>'+wind+'</span><span>'+env.join(' · ')+'</span></div></div>';
+}
 function render(){
-  var cards = rank(DATA, DATES, null);
-
-  document.getElementById("out").innerHTML =
-    '<div class="grid">' + cards.map(function(c){
-      var s=c.s, b=c.best;
-      var h = '<div class="tile '+(b?b.v:"nic")+(SELECTED===s.id?" sel":"")+'" data-id="'+s.id+'">';
-      h += '<div class="th"><div><div class="tn">'+esc(s.name)+'</div>'+
-           '<div class="ts">'+esc(s.sub)+'</div></div>'+
-           '<div class="tkm">'+s.km+' km</div></div>';
-
-      h += '<div class="days">';
-      c.days.forEach(function(a,j){
-        h += '<div class="day"><div class="dlab">'+dayName(DATES[j])+'</div>';
-        h += a ? spine(a.hrs, s.dirs) : '';
-        var cls = !a ? "" : a.v==="jede"?"go":a.v==="hranicni"?"mar":a.v==="boure"?"storm":"";
-        var inner = "—";
-        if(a&&a.v==="boure") inner="⚡";
-        else if(a&&a.w&&a.w.kite){
-          var ns = starCount(a.w.mean);
-          inner = '<span class="stars">'+"★".repeat(ns)+'<span class="e">'+"★".repeat(3-ns)+'</span></span>';
-          var kg = a.w.kiteGust;
-          if(kg && kg!==a.w.kite) inner += '<span class="gustup" title="poryvy tlačí na menší kite">↑</span>';
-        }
-        h += '<div class="dk '+cls+'">'+inner+'</div></div>';
-      });
-      h += '</div>';
-
-      if(b&&b.w){
-        var w=b.w, bi=c.days.indexOf(b);
-        h += '<div class="best"><span class="lead">'+dayName(DATES[bi])+' '+
-             w.from+'–'+w.to+'h</span> · '+w.mean.toFixed(1)+' m/s · '+compass(w.dir)+
-             ' · GF '+w.gf.toFixed(2);
-        if(w.kite && w.kiteGust && w.kiteGust!==w.kite)
-          h += ' · <span class="w-mar">poryv na '+(w.kiteGust==="moc"?"víc než 8":w.kiteGust)+'</span>';
-        if(w.cape>CAPE_WATCH) h += ' · <span class="'+(w.cape>CAPE_ALARM?"w-storm":"w-mar")+
-             '">CAPE '+Math.round(w.cape)+'</span>';
-        if(w.show>RAIN_FLAG) h += ' · <span class="w-storm">'+w.show.toFixed(1)+' mm konv.</span>';
-        h += '</div>';
-      } else {
-        var bi2 = b?c.days.indexOf(b):-1;
-        h += '<div class="best">'+(b?'<span class="lead">'+dayName(DATES[bi2])+'</span> · '+esc(b.label):"—")+
-             (b?' · max '+b.peak.toFixed(1)+' m/s':'');
-        if(b&&b.label==="Špatný směr"&&b.hrs.length){
-          var pk = b.hrs.reduce(function(a,x){ return x.wind>a.wind?x:a; }, b.hrs[0]);
-          var miss = Math.min(Math.abs(pk.dir-s.dirs[0]), Math.abs(pk.dir-s.dirs[1]));
-          if(miss>180) miss = 360-miss;
-          h += ' · vane '+compass(pk.dir)+' ('+Math.round(pk.dir)+'°), sektor '+
-               s.dirs[0]+'–'+s.dirs[1]+'°';
-          if(miss<=20) h += ' <span class="w-mar">— mimo jen o '+Math.round(miss)+'°</span>';
-        }
-        h += '</div>';
-      }
-
-      if(s.flag) h += '<div class="flag'+(s.dirs&&!s.guess?" dim":"")+'">'+esc(s.flag)+'</div>';
-      return h + '</div>';
-    }).join("") + '</div>';
-
-  document.getElementById("foot").innerHTML =
-    'Data <strong>Open-Meteo, model ICON seamless</strong> (D2 2,2 km na blízko → ICON-EU 7 km dál), '+
-    'vítr v 10 m. Není to Windguru mix — ten má ~63 % vah jinde a je systematicky '+
-    'o ~0,5 m/s níž. Ber tohle jako síto, widget jako rozhodnutí. '+
-    'Sektory směrů: kde je <code>null</code>, směr se NEHODNOTÍ — radši žádné pravidlo než vymyšlené. '+
-    '<br><button class="rl" onclick="load()">Načíst znovu</button>';
+  applyLang();
+  if(!DATA) return;
+  var spots=effSpots(CFG);
+  var scored=spots.map(function(s){
+    var si=spots.indexOf(s);
+    var best=0,bv="nic";
+    var rank={go:3,mar:2,storm:1,nic:0};
+    DATES.forEach(function(d){
+      var a=assess((DATA[si]||{days:{}}).days[d]||[],s,CFG);
+      if(a){ if(rank[a.v]>rank[bv])bv=a.v; if(a.score>best)best=a.score; }
+    });
+    return {s:s,si:si,score:best,bv:bv};
+  });
+  if(CFG.sort!=="custom") scored.sort(function(a,b){return b.score-a.score||a.s.km-b.s.km;});
+  document.getElementById("out").innerHTML='<div class="grid">'+scored.map(function(r){
+    var s=r.s;
+    var wt = s.sea&&SST!=null ? '<br>🌊 '+Math.round(convT(SST,CFG.tunit))+'°' : '';
+    return '<div class="spot '+r.bv+'" data-id="'+s.id+'">'+
+      '<div class="shead"><div><span class="sname">'+esc(s.name)+'</span><div class="ssub">'+esc(s.sub)+'</div></div>'+
+      '<div class="smeta">'+s.km+' km<span class="scog" data-ps="'+s.id+'">⚙</span>'+wt+'</div></div>'+
+      DATES.map(function(d,di){return dayBlock(s,r.si,d,di);}).join('')+'</div>';
+  }).join('')+'</div>'+(window.__off?'<div class="offnote">'+window.__off+'</div>':'');
 }
 
-/* ---- WG widget na klik ---- */
+/* ================= WG panel ================= */
 function showWG(id){
-  var s = SPOTS.filter(function(x){return x.id===id;})[0];
-  SELECTED = id; render();
+  var spots=effSpots(CFG), s=spots.filter(function(x){return x.id===id;})[0];
+  if(!s) return;
+  SEL=id;
+  var t=T[CFG.lang];
   var wrap=document.getElementById("wgwrap"), slot=document.getElementById("wgslot");
   wrap.style.display="block";
-  document.getElementById("wgname").textContent = s.name + " — Windguru (WG mix)";
-  document.getElementById("wgsub").textContent = s.sub + " · " + s.km + " km z Varů";
+  document.getElementById("wgname").textContent=s.name+" — "+t.wgT;
+  document.getElementById("wgsub").textContent=fmt(t.wgSub,{km:s.km});
   slot.innerHTML="";
   if(!s.wg){
-    slot.innerHTML = '<div id="wgnote">Windguru spot ID pro tenhle spot nemám.<br><br>'+
-      'Vygeneruj widget na windguru.cz → z kódu opiš číslo za <b>s=</b> → doplň do '+
-      'konfigurace nahoře k <b>'+esc(s.id)+'</b> jako <b>wg: číslo</b>.</div>';
-    wrap.scrollIntoView({behavior:"smooth", block:"nearest"});
-    return;
+    slot.innerHTML='<div class="lk">'+t.wgNone+' <a href="'+(s.verify||"#")+'" target="_blank" rel="noopener">windy.com / AROME →</a></div>';
+    wrap.scrollIntoView({behavior:"smooth",block:"nearest"}); return;
   }
-  var uid = "wg_fwdg_"+s.wg+"_100_"+Date.now();
-  var anchor = document.createElement("script"); anchor.id = uid; slot.appendChild(anchor);
-  var ld = document.createElement("script");
-  ld.src = "https://www.windguru.cz/js/widget.php?" + [
-    "s="+s.wg, "m=100", "uid="+uid, "wj=ms", "tj=c", "waj=m", "tij=cm",
-    "odh=0", "doh=24", "fhours=96", "hrsm=2", "vt=forecasts", "lng=cz", "idbs=1",
-    "p=WINDSPD,GUST,SMER,APCP1s,RATING"
-  ].join("&");
+  var uid="wg_fwdg_"+s.wg+"_100_"+Date.now();
+  var anchor=document.createElement("script"); anchor.id=uid; slot.appendChild(anchor);
+  var ld=document.createElement("script");
+  ld.src="https://www.windguru.cz/js/widget.php?"+["s="+s.wg,"m=100","uid="+uid,"wj=ms","tj=c",
+    "odh=0","doh=24","fhours=96","hrsm=2","vt=forecasts","lng="+(CFG.lang==="cs"?"cz":CFG.lang),"idbs=1",
+    "p=WINDSPD,GUST,SMER,APCP1s,RATING"].join("&");
   slot.appendChild(ld);
-  wrap.scrollIntoView({behavior:"smooth", block:"nearest"});
-  setTimeout(function(){
-    if(slot.querySelectorAll("iframe,table,div").length===0)
-      slot.innerHTML='<div id="wgnote">Widget se nevykreslil. Jsi online?</div>';
-  }, 5000);
+  wrap.scrollIntoView({behavior:"smooth",block:"nearest"});
+  setTimeout(function(){ if(slot.querySelectorAll("iframe,table,div").length===0)
+    slot.innerHTML='<div class="lk">'+t.wgFail+'</div>'; },5000);
 }
 
-document.addEventListener("click", function(e){
-  var t = e.target.closest(".tile");
-  if(t) showWG(t.dataset.id);
-});
-
-/* ---- data ---- */
-function draw(json, fromCache){
-  DATA = parseForecast(json);
-  DATES = Object.keys(DATA[0]).sort().slice(0,4);
-  render();
-  if(fromCache){
-    var b=document.createElement("div");
-    b.style.cssText="font-family:var(--mono);font-size:10px;color:var(--mar);margin:10px 0 0";
-    b.textContent="⚠ offline — poslední stažená data ("+(localStorage.getItem("kite-when")||"?")+")";
-    document.getElementById("out").appendChild(b);
-  }
+/* ================= data ================= */
+function fx(url){
+  var ctrl=("AbortController"in window)?new AbortController():null, to=false;
+  var timer=setTimeout(function(){to=true;if(ctrl)ctrl.abort();},12000);
+  return fetch(url,ctrl?{signal:ctrl.signal,cache:"no-store"}:{cache:"no-store"})
+    .then(function(r){clearTimeout(timer);if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+    .catch(function(e){clearTimeout(timer);throw to?new Error("timeout"):e;});
 }
 function load(){
-  document.getElementById("out").innerHTML='<div class="msg">Tahám data…</div>';
-  fetch(buildUrl()).then(function(r){
-    if(!r.ok) throw new Error("HTTP "+r.status); return r.json();
-  }).then(function(j){
-    try{ localStorage.setItem("kite-cache", JSON.stringify(j));
-         localStorage.setItem("kite-when", new Date().toLocaleString("cs-CZ")); }catch(e){}
-    draw(j, false);
+  window.__off=null;
+  document.getElementById("out").innerHTML='<div class="msg">'+T[CFG.lang].load+'</div>';
+  var spots=effSpots(CFG);
+  var main=spots.filter(function(s){return !s.model;});
+  var custom=spots.filter(function(s){return s.model;});
+  var seas=spots.filter(function(s){return s.sea;});
+  var jobs=[ fx(urlMain(main)) ];
+  jobs.push(custom.length?Promise.all(custom.map(function(s){return fx(urlModel([s],s.model)).catch(function(){return null;});})):Promise.resolve([]));
+  jobs.push(fx(urlConf(spots)).catch(function(){return null;}));
+  jobs.push(seas.length?fx(urlMarine(seas[0])).catch(function(){return null;}):Promise.resolve(null));
+  Promise.all(jobs).then(function(res){
+    var mainArr=Array.isArray(res[0])?res[0]:[res[0]];
+    var byId={};
+    main.forEach(function(s,i){ byId[s.id]=parseLoc(mainArr[i]); });
+    custom.forEach(function(s,i){
+      var r=res[1][i]; byId[s.id]=parseLoc(r?(Array.isArray(r)?r[0]:r):null);
+    });
+    DATA=spots.map(function(s){ return byId[s.id]||{days:{},sunset:{}}; });
+    var first=DATA.filter(function(d){return Object.keys(d.days).length;})[0];
+    DATES=first?Object.keys(first.days).sort().slice(0,4):[];
+    CONF={};
+    if(res[2]){
+      var ca=Array.isArray(res[2])?res[2]:[res[2]];
+      spots.forEach(function(s,i){
+        var per=parseConfLoc(ca[i],CFG); CONF[s.id]={};
+        for(var d in per) CONF[s.id][d]=confidence(per[d]);
+      });
+    }
+    SST=null;
+    if(res[3]&&res[3].daily&&res[3].daily.sea_surface_temperature_max)
+      SST=res[3].daily.sea_surface_temperature_max[0];
+    try{ localStorage.setItem("kite-cache-v2",JSON.stringify({DATA:DATA,DATES:DATES,CONF:CONF,SST:SST,
+      when:new Date().toLocaleString("cs-CZ")})); }catch(e){}
+    render();
   }).catch(function(e){
-    var cached=null; try{ cached=localStorage.getItem("kite-cache"); }catch(e2){}
-    if(cached){ draw(JSON.parse(cached), true); return; }
-    document.getElementById("out").innerHTML =
-      '<div class="err"><strong>Data se nenačetla</strong> ('+esc(e.message)+') a nemám offline zálohu.<br>'+
-      '<button class="rl" onclick="load()">Zkusit znovu</button></div>';
+    var t=T[CFG.lang];
+    var why=e.message==="timeout"?t.timeout:esc(e.message);
+    var c=null; try{ c=JSON.parse(localStorage.getItem("kite-cache-v2")||"null"); }catch(e2){}
+    if(c){ DATA=c.DATA;DATES=c.DATES;CONF=c.CONF||{};SST=c.SST;
+      window.__off=fmt(t.offline,{t:c.when||"?"})+" ("+why+")"; render(); return; }
+    document.getElementById("out").innerHTML='<div class="err"><strong>'+t.errT+'</strong> — '+why+t.errB+
+      '<br><button class="rl" onclick="load()">'+t.retry+'</button></div>';
   });
 }
-/* ---------------- PWA: service worker + notifikace ---------------- */
-var SW_REG=null;
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("./sw.js").then(function(r){ SW_REG=r; refreshNotifUI(); })
-    .catch(function(){ /* file:// nebo bez https → SW nejede, appka funguje dál */ });
+
+/* ================= nastavení ================= */
+function openSet(psId){
+  var t=T[CFG.lang], m=trm();
+  document.getElementById("m_t").textContent=t.sT;
+  document.getElementById("m_gen").textContent=t.gen;
+  document.getElementById("m_home").textContent=t.home;
+  document.getElementById("m_wu").textContent=t.wu;
+  document.getElementById("m_wt").textContent=t.wt;
+  document.getElementById("m_hrs").textContent=t.hrs;
+  document.getElementById("m_cape").textContent=t.cape;
+  document.getElementById("m_sort").textContent=t.sort;
+  document.getElementById("m_sw").textContent=t.sortW;
+  document.getElementById("m_sc").textContent=t.sortC;
+  document.getElementById("m_gear").textContent=CFG.mode==="kite"?t.gearK:t.gearW;
+  document.getElementById("m_gearcap").textContent=t.gearCap;
+  document.getElementById("addgear").textContent=fmt(t.addG,{one:m.one});
+  document.getElementById("m_spots").textContent=t.spots;
+  document.getElementById("addspotbtn").textContent=t.addS;
+  document.getElementById("a_n").textContent=t.name;
+  document.getElementById("a_d").textContent=t.dirs;
+  document.getElementById("f_ok").textContent=t.okBtn;
+  document.getElementById("m_ps").textContent=t.ps;
+  document.getElementById("ps_d").textContent=t.psd;
+  document.getElementById("ps_m").textContent=t.psm;
+  document.getElementById("savebtn").textContent=t.save;
+  document.getElementById("i_home").value=CFG.home;
+  document.getElementById("i_w").value=CFG.weight;
+  document.getElementById("i_h1").value=CFG.hStart;
+  document.getElementById("i_h2").value=CFG.hEnd;
+  document.getElementById("i_cape").value=CFG.cape;
+  document.querySelectorAll("#unitseg span").forEach(function(s){s.classList.toggle("on",s.dataset.u===CFG.unit);});
+  document.querySelectorAll("#sortseg span").forEach(function(s){s.classList.toggle("on",s.dataset.s===CFG.sort);});
+  renderGearTab(); renderSpotTab(); renderPS(psId);
+  document.getElementById("ovl").classList.add("on");
 }
-function refreshNotifUI(){
-  var txt=document.getElementById("notiftxt"), btn=document.getElementById("notifbtn"),
-      test=document.getElementById("testbtn");
-  if(!("Notification" in window) || !("serviceWorker" in navigator)){
-    txt.textContent="Ranní brief: prohlížeč nepodporuje"; btn.style.display="none"; return;
+function closeSet(){ document.getElementById("ovl").classList.remove("on"); }
+function renderGearTab(){
+  var t=T[CFG.lang], g=CFG.gear[CFG.mode], th=CFG.starTh;
+  var h='<tr><th>'+t.gcol[0]+' ('+trm().u+')</th><th>'+t.gcol[1]+'</th><th>'+t.gcol[2]+'</th><th>'+t.gcol[3]+'</th><th></th></tr>';
+  g.forEach(function(x,i){
+    h+='<tr><td><input class="inp" data-g="'+i+'" data-k="s" value="'+esc(x.s)+'"></td>'+
+       '<td><input class="inp" data-g="'+i+'" data-k="f" type="number" step="0.5" value="'+x.f+'"></td>'+
+       '<td><input class="inp" data-g="'+i+'" data-k="t" type="number" step="0.5" value="'+x.t+'"></td>'+
+       '<td class="stc">'+"★".repeat(i+1)+'</td>'+
+       '<td class="rm" data-rm="'+i+'">'+(g.length>1?'✕':'')+'</td></tr>';
+  });
+  document.getElementById("geartab").innerHTML=h;
+}
+function renderSpotTab(){
+  var t=T[CFG.lang];
+  var all=BASE_SPOTS.concat(CFG.added||[]);
+  if(CFG.sort==="custom"&&(CFG.order||[]).length)
+    all.sort(function(a,b){var ia=CFG.order.indexOf(a.id),ib=CFG.order.indexOf(b.id);return (ia<0?99:ia)-(ib<0?99:ib);});
+  var h='<tr><th></th><th>'+t.name+'</th><th>km</th><th>'+t.dirs+'</th><th>WG</th><th></th><th></th></tr>';
+  all.forEach(function(s){
+    var o=(CFG.ov||{})[s.id]||{};
+    var dirs=o.dirs!==undefined?o.dirs:s.dirs;
+    var hid=(CFG.hidden||{})[s.id];
+    var added=(CFG.added||[]).some(function(a){return a.id===s.id;});
+    h+='<tr class="'+(hid?'off':'')+'">'+
+      '<td><span class="ic" data-up="'+s.id+'">▲</span><span class="ic" data-dn="'+s.id+'">▼</span></td>'+
+      '<td class="nm">'+esc(s.name)+'</td><td class="mono">'+(o.km!==undefined?o.km:s.km)+'</td>'+
+      '<td class="mono">'+(dirsToStr(dirs)||"—")+'</td>'+
+      '<td class="mono">'+(o.wg!==undefined?o.wg:(s.wg||"—"))+'</td>'+
+      '<td><span class="ic" data-eye="'+s.id+'">'+(hid?'🚫':'👁')+'</span></td>'+
+      '<td>'+(added?'<span class="ic" data-del="'+s.id+'">✕</span>':'')+'</td></tr>';
+  });
+  document.getElementById("spottab").innerHTML=h;
+}
+function renderPS(sel){
+  var all=BASE_SPOTS.concat(CFG.added||[]);
+  var s=document.getElementById("ps_sel");
+  s.innerHTML=all.map(function(x){return '<option value="'+x.id+'"'+(x.id===sel?' selected':'')+'>'+esc(x.name)+'</option>';}).join('');
+  fillPS();
+}
+function fillPS(){
+  var id=document.getElementById("ps_sel").value;
+  var base=BASE_SPOTS.concat(CFG.added||[]).filter(function(x){return x.id===id;})[0]||{};
+  var o=(CFG.ov||{})[id]||{};
+  var dirs=o.dirs!==undefined?o.dirs:base.dirs;
+  document.getElementById("ps_dirs").value=dirs?dirs.map(function(x){return x[0]+"-"+x[1];}).join(","):"";
+  document.getElementById("ps_min").value=o.min!=null?o.min:6.0;
+  document.getElementById("ps_wg").value=o.wg!==undefined?(o.wg||""):(base.wg||"");
+}
+function collectAndSave(){
+  CFG.home=document.getElementById("i_home").value||CFG.home;
+  CFG.weight=+document.getElementById("i_w").value||CFG.weight;
+  CFG.hStart=Math.max(0,Math.min(23,+document.getElementById("i_h1").value||6));
+  CFG.hEnd=Math.max(CFG.hStart+1,Math.min(23,+document.getElementById("i_h2").value||21));
+  CFG.cape=+document.getElementById("i_cape").value||1500;
+  var g=CFG.gear[CFG.mode];
+  document.querySelectorAll("#geartab input").forEach(function(inp){
+    var i=+inp.dataset.g,k=inp.dataset.k;
+    if(g[i]) g[i][k]= k==="s"?inp.value:(+inp.value||g[i][k]);
+  });
+  g.sort(function(a,b){return a.f-b.f;});
+  CFG.starTh=starThFor(g.length);
+  var id=document.getElementById("ps_sel").value;
+  if(id){
+    if(!CFG.ov)CFG.ov={};
+    var o=CFG.ov[id]||{};
+    o.dirs=parseDirs(document.getElementById("ps_dirs").value);
+    var mn=+document.getElementById("ps_min").value; if(mn)o.min=mn;
+    var wg=document.getElementById("ps_wg").value.trim(); o.wg=wg?+wg:null;
+    CFG.ov[id]=o;
   }
-  if(Notification.permission==="granted"){
-    txt.textContent="Ranní brief: zapnuto"; btn.style.display="none"; test.style.display="";
-    if(SW_REG && SW_REG.periodicSync){
-      SW_REG.periodicSync.register("kite-morning",{minInterval:12*60*60*1000}).catch(function(){});
-    }
-  } else if(Notification.permission==="denied"){
-    txt.textContent="Ranní brief: zakázáno v prohlížeči"; btn.style.display="none";
-  } else {
-    txt.textContent="Ranní brief: vypnuto"; btn.style.display=""; test.style.display="none";
-  }
-}
-function enableNotif(){
-  if(!("Notification" in window)) return;
-  Notification.requestPermission().then(function(){ refreshNotifUI(); });
-}
-function testNotif(){
-  if(SW_REG && SW_REG.active){ SW_REG.active.postMessage("run-brief"); }
+  saveCfg(CFG); closeSet(); load();
 }
 
-load();
-refreshNotifUI();
+/* ================= události ================= */
+document.getElementById("gearbtn").onclick=function(){openSet(null);};
+document.getElementById("savebtn").onclick=collectAndSave;
+document.getElementById("langseg").addEventListener("click",function(e){
+  var l=e.target.dataset.l; if(!l)return; CFG.lang=l; saveCfg(CFG); render();
+});
+document.getElementById("modeseg").addEventListener("click",function(e){
+  var m=e.target.dataset.m; if(!m)return; CFG.mode=m;
+  CFG.starTh=starThFor(CFG.gear[m].length); saveCfg(CFG); render();
+});
+document.getElementById("unitseg").addEventListener("click",function(e){
+  var u=e.target.dataset.u; if(!u)return; CFG.unit=u;
+  document.querySelectorAll("#unitseg span").forEach(function(s){s.classList.toggle("on",s.dataset.u===u);});
+});
+document.getElementById("sortseg").addEventListener("click",function(e){
+  var s=e.target.dataset.s; if(!s)return; CFG.sort=s;
+  document.querySelectorAll("#sortseg span").forEach(function(x){x.classList.toggle("on",x.dataset.s===s);});
+});
+document.getElementById("addgear").onclick=function(){
+  var g=CFG.gear[CFG.mode];
+  g.push({s:"?",f:6,t:12});
+  CFG.starTh=starThFor(g.length);
+  renderGearTab();
+};
+document.getElementById("geartab").addEventListener("click",function(e){
+  var rm=e.target.dataset.rm;
+  if(rm!==undefined){ var g=CFG.gear[CFG.mode]; if(g.length>1){g.splice(+rm,1);CFG.starTh=starThFor(g.length);renderGearTab();} }
+});
+document.getElementById("addspotbtn").onclick=function(){document.getElementById("addform").classList.toggle("on");};
+document.getElementById("f_ok").onclick=function(){
+  var nm=document.getElementById("f_name").value.trim();
+  var la=+document.getElementById("f_lat").value, lo=+document.getElementById("f_lon").value;
+  if(!nm||!la||!lo) return;
+  var id="u_"+nm.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,10)+Date.now()%1000;
+  (CFG.added=CFG.added||[]).push({id:id,name:nm,sub:"",km:+document.getElementById("f_km").value||0,
+    wg:+document.getElementById("f_wg").value||null,lat:la,lon:lo,
+    dirs:parseDirs(document.getElementById("f_dirs").value)});
+  document.getElementById("addform").classList.remove("on");
+  renderSpotTab(); renderPS(id);
+};
+document.getElementById("spottab").addEventListener("click",function(e){
+  var d=e.target.dataset;
+  if(d.eye){ CFG.hidden=CFG.hidden||{}; CFG.hidden[d.eye]=!CFG.hidden[d.eye]; renderSpotTab(); }
+  if(d.del){ CFG.added=(CFG.added||[]).filter(function(a){return a.id!==d.del;}); renderSpotTab(); }
+  if(d.up||d.dn){
+    var id=d.up||d.dn;
+    var all=BASE_SPOTS.concat(CFG.added||[]).map(function(s){return s.id;});
+    var ord=(CFG.order&&CFG.order.length)?CFG.order.slice():all;
+    all.forEach(function(x){if(ord.indexOf(x)<0)ord.push(x);});
+    var i=ord.indexOf(id), j=d.up?i-1:i+1;
+    if(j>=0&&j<ord.length){ var tmp=ord[i];ord[i]=ord[j];ord[j]=tmp; CFG.order=ord; renderSpotTab(); }
+  }
+});
+document.getElementById("ps_sel").onchange=fillPS;
+document.getElementById("out").addEventListener("click",function(e){
+  var cog=e.target.closest(".scog");
+  if(cog){ e.stopPropagation(); openSet(cog.dataset.ps); return; }
+  var tile=e.target.closest(".spot");
+  if(tile) showWG(tile.dataset.id);
+});
+document.getElementById("legbtn").onclick=function(){
+  var b=document.getElementById("legbody"); b.classList.toggle("hid");
+  document.getElementById("legar").textContent=b.classList.contains("hid")?T[CFG.lang].show:T[CFG.lang].hide;
+};
+
+/* ================= PWA + ranní přehled ================= */
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("./sw.js").then(function(r){SW_REG=r;refreshBrief();}).catch(function(){});
+}
+function refreshBrief(){
+  var t=T[CFG.lang];
+  var txt=document.getElementById("brieftxt"),b1=document.getElementById("briefbtn"),b2=document.getElementById("brieftest");
+  b1.textContent=t.on; b2.textContent=t.test;
+  if(!("Notification"in window)||!("serviceWorker"in navigator)){txt.textContent=t.briefNo;b1.style.display="none";b2.style.display="none";return;}
+  if(Notification.permission==="granted"){
+    txt.textContent=t.briefOn;b1.style.display="none";b2.style.display="";
+    if(SW_REG&&SW_REG.periodicSync)SW_REG.periodicSync.register("kite-morning",{minInterval:12*60*60*1000}).catch(function(){});
+  } else if(Notification.permission==="denied"){txt.textContent=t.briefDenied;b1.style.display="none";b2.style.display="none";}
+  else {txt.textContent=t.briefOff;b1.style.display="";b2.style.display="none";}
+}
+document.getElementById("briefbtn").onclick=function(){
+  if("Notification"in window)Notification.requestPermission().then(refreshBrief);
+};
+document.getElementById("brieftest").onclick=function(){
+  if(SW_REG&&SW_REG.active)SW_REG.active.postMessage("run-brief");
+};
+
+applyLang(); load();
 </script>
 </body>
 </html>
