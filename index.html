@@ -10,6 +10,12 @@
       <div class="row"><div class="lbl" id="m_wu"></div>
         <div class="seg" id="unitseg"><span data-u="ms">m/s</span><span data-u="kt">kt</span><span data-u="kmh">km/h</span></div></div>
       <div class="row"><div class="lbl" id="m_wt"></div><input class="inp" id="i_w" type="number"></div>
+      <div class="row"><div class="lbl" id="m_gap"></div>
+        <span style="display:flex;align-items:center;gap:8px"><input type="range" id="i_gap" min="0.9" max="2.2" step="0.05" style="width:110px"><span class="val" id="gapval"></span></span></div>
+      <div class="row"><div class="lbl" id="m_cgap"></div>
+        <span style="display:flex;align-items:center;gap:8px"><input type="range" id="i_cgap" min="10" max="40" step="1" style="width:110px"><span class="val" id="cgapval"></span></span></div>
+      <div class="row"><div class="lbl" id="m_days"></div>
+        <div class="seg" id="daysseg"><span data-d="4">4</span><span data-d="7">7</span><span data-d="10">10</span><span data-d="14">14</span></div></div>
       <div class="row"><div class="lbl" id="m_hrs"></div>
         <span><input class="inp" id="i_h1" type="number" min="0" max="23" style="width:52px">–<input class="inp" id="i_h2" type="number" min="0" max="23" style="width:52px"></span></div>
       <div class="row"><div class="lbl" id="m_cape"></div><input class="inp" id="i_cape" type="number"></div>
@@ -23,7 +29,18 @@
       <button class="addb" id="addgear"></button>
     </div>
 
+    <div class="sec"><h3 id="m_scale"></h3>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px" id="m_scalecap"></div>
+      <table class="gt" id="scaletab"></table>
+      <button class="addb" id="addscale"></button>
+    </div>
+
     <div class="sec"><h3 id="m_spots"></h3>
+      <div class="row" style="border-bottom:none;padding-bottom:4px">
+        <div class="lbl" id="m_notiftxt"></div>
+        <span style="display:flex;gap:6px"><button class="rl" id="notifbtn" style="margin:0"></button>
+        <button class="rl" id="notiftest" style="margin:0;display:none">test</button></span></div>
+      <div style="font-size:10px;color:var(--muted);margin:0 0 8px" id="m_watchcap"></div>
       <table class="sp" id="spottab"></table>
       <button class="addb" id="addspotbtn"></button>
       <div class="addform" id="addform">
@@ -54,6 +71,7 @@
     <div class="sec">
       <input type="hidden" id="ps_id">
       <div class="row"><div class="lbl" id="ps_d"></div><input class="inp wide" id="ps_dirs" placeholder="45-315"></div>
+      <div style="font-size:10px;color:var(--dim);margin:-4px 0 4px" id="ps_ddesc"></div>
       <div class="row"><div class="lbl" id="ps_nsec"></div>
         <div class="seg" id="secseg"><span data-n="1" id="ps_s1"></span><span data-n="2" id="ps_s2"></span></div></div>
       <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start;margin:8px 0 4px">
@@ -62,7 +80,23 @@
         <div style="font-size:10px;color:var(--dim);max-width:210px;line-height:1.5" id="ps_hint"></div>
       </div>
       <div class="row"><div class="lbl" id="ps_m"></div><input class="inp" id="ps_min" type="number" step="0.5"></div>
+      <div style="font-size:10px;color:var(--dim);margin:-4px 0 4px" id="ps_mdesc"></div>
+      <div class="row"><div class="lbl" id="ps_mod"></div>
+        <select class="inp wide" id="ps_model" style="text-align:left">
+          <option value="">— auto (nejlepší) —</option>
+          <option value="meteofrance_seamless">AROME (Alpy/Garda)</option>
+          <option value="meteoswiss_icon_ch1">ICON-CH1 (Alpy)</option>
+          <option value="icon_seamless">ICON (ČR/DE)</option>
+          <option value="icon_d2">ICON-D2 (2 km)</option>
+          <option value="ecmwf_ifs025">ECMWF</option>
+          <option value="gfs_seamless">GFS</option>
+        </select></div>
+      <div style="font-size:10px;color:var(--dim);margin:-4px 0 4px" id="ps_moddesc"></div>
+      <button class="rl" id="modinfo_btn" style="margin:2px 0 4px"></button>
+      <div id="modinfo" style="display:none;font-size:10.5px;color:var(--muted);line-height:1.5;
+        border:1px solid var(--line);border-radius:5px;padding:9px 11px;margin-bottom:4px"></div>
       <div class="row"><div class="lbl">Windguru</div><input class="inp" id="ps_wg" type="number"></div>
+      <button class="addb" id="ps_reset" style="border-color:var(--storm);color:var(--storm);margin-top:10px"></button>
     </div>
   </div>
 
@@ -87,6 +121,13 @@
     --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   }
+  html[data-theme="light"]{
+    --bg:#EEF3F8; --panel:#FFFFFF; --line:#C9D6E4; --text:#1B2A3A; --muted:#5A6B7E; --dim:#9AACBE;
+    --accent:#B8860B; --go:#1E9E73; --mar:#C67A22; --storm:#D2483A; --spine:#2E6EA6;
+  }
+  html[data-theme="light"] body{background-image:linear-gradient(rgba(46,110,166,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(46,110,166,.05) 1px,transparent 1px);}
+  html[data-theme="light"] .seg span.on{color:#fff}
+  html[data-theme="light"] #wgslot{background:#fff}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:18px 14px 50px;
        background-image:linear-gradient(rgba(143,208,255,.03) 1px,transparent 1px),
@@ -114,7 +155,7 @@
   .scog{color:var(--dim);cursor:pointer;font-size:13px;margin-left:6px}
   .scog:hover{color:var(--accent)}
 
-  .day{border:1px solid var(--line);border-left-width:3px;border-radius:4px;padding:6px 7px 4px;margin-bottom:6px;border-left-color:var(--dim)}
+  .day{border:1px solid var(--line);border-left-width:3px;border-radius:4px;padding:9px var(--daypad,10px) 7px;margin-bottom:6px;border-left-color:var(--dim)}
   .day.go{border-left-color:var(--go);background:rgba(79,208,160,.05)}
   .day.mar{border-left-color:var(--mar);background:rgba(232,151,74,.05)}
   .day.storm{border-left-color:var(--storm);background:rgba(255,122,107,.05)}
@@ -124,19 +165,27 @@
   .dverd{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.06em;margin-left:auto}
   .dverd.go{color:var(--go)} .dverd.mar{color:var(--mar)} .dverd.storm{color:var(--storm)} .dverd.nic{color:var(--dim)}
 
-  .hours{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1px;align-items:end}
-  .hr{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
-  .shw{font-size:8px;height:9px;line-height:1}
-  .hv{font-family:var(--mono);font-size:6.5px;color:var(--spine);height:8px;opacity:.9}
-  .bar{width:100%;display:flex;align-items:flex-end;justify-content:center;height:26px;position:relative}
-  .bar .w{width:62%;border-radius:1px 1px 0 0}
-  .bar .g{position:absolute;width:62%;left:19%;border-top:1px solid var(--spine);opacity:.5}
-  .arw{font-size:9px;line-height:1;color:var(--spine);opacity:.9}
-  .stk{display:flex;flex-direction:column-reverse;height:auto;font-size:9px;line-height:.95}
-  .hlab{font-family:var(--mono);font-size:7.5px;color:var(--dim);height:9px}
-  .dfoot{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px;padding-top:4px;
-         border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-  .dfoot b{color:var(--text)}
+  .hours{display:grid;grid-auto-flow:column;grid-auto-columns:var(--colw,20px);gap:2px;align-items:start;width:max-content}
+  .hr{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+  .shw{font-size:9px;height:11px;line-height:1}
+  .arw{font-size:12px;line-height:1;color:var(--spine);opacity:.85;height:13px}
+  .nums{display:flex;flex-direction:column;align-items:center;line-height:var(--numgap,1.05);font-family:var(--mono)}
+  .nums .nm{font-size:13px;font-weight:700}
+  .nums .ng{font-size:13px;font-weight:400}
+  .nums .ng{opacity:.85}
+  .hlab{font-family:var(--mono);font-size:8px;color:var(--dim);height:10px;margin-top:2px}
+  /* pás dní vodorovně + štítky */
+  .pills{display:flex;gap:4px;margin:2px 0 6px;flex-wrap:wrap}
+  .pill{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:3px;cursor:pointer;
+        border:1px solid var(--line);color:var(--muted)}
+  .pill.go{background:rgba(79,208,160,.15);border-color:var(--go);color:var(--go)}
+  .pill.mar{background:rgba(232,151,74,.15);border-color:var(--mar);color:var(--mar)}
+  .pill.storm{background:rgba(255,122,107,.15);border-color:var(--storm);color:var(--storm)}
+  .strip{display:flex;gap:8px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;
+         -webkit-overflow-scrolling:touch;padding-bottom:6px;touch-action:pan-x pan-y}
+  .strip .day{scroll-snap-align:start;flex:0 0 auto;width:max-content;max-width:none;margin-bottom:0}
+  .strip .hours{width:max-content}
+  .dfoot{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:7px;padding-top:6px;border-top:1px solid var(--line)}
 
   #wgwrap{margin-top:18px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;display:none}
   #wgwrap h2{font-size:12px;font-weight:650;color:var(--accent);margin-bottom:2px}
@@ -200,6 +249,7 @@
     .rose{cursor:crosshair}
   .rose text{font-family:var(--mono);fill:var(--muted)} .rose .lbl-n{fill:var(--text);font-weight:700}
   input.bad{border-color:var(--storm)!important}
+  .bell{opacity:.5} .bell.on{opacity:1}
   .msg{font-family:var(--mono);font-size:11px;color:var(--muted);padding:22px}
   .err{border:1px solid var(--storm);border-radius:6px;padding:13px;font-size:12px;line-height:1.6}
   .offnote{font-family:var(--mono);font-size:10px;color:var(--mar);margin-top:9px}
@@ -211,6 +261,7 @@
     <h1 id="apptitle">Kite check</h1>
     <div class="tools">
       <div class="seg" id="langseg"><span data-l="cs">CZ</span><span data-l="en">EN</span><span data-l="de">DE</span></div>
+      <div class="seg" id="themeseg"><span id="themebtn">◐</span></div>
       <div class="seg" id="gearseg"><span id="gearbtn">⚙</span></div>
     </div>
   </div>
@@ -312,7 +363,16 @@ var T={
    aKmh:"z domova, jen pro řazení", aWgh:"číslo z widgetu, nepovinné", aDh:"nepovinné, doplníš i v nastavení spotu",
    aErr:"Vyplň název i souřadnice (Lat i Lon).",
    nsec:"Počet směrů", s1:"1 směr", s2:"2 směry",
-   psHint:"Klepni do růžice: první klik = odkud, druhý = kam. Zelený výsek jede.",
+   psMod:"Odkud brát data (model)", watch:"hlídat", notifBtn:"Zapnout ranní upozornění", notifOn:"Ranní upozornění: zapnuto", notifOff:"Ranní upozornění: vypnuto", notifNo:"Upozornění: prohlížeč nepodporuje", watchCap:"Zaškrtnuté spoty budou v ranním upozornění (až spustíme doručování).", mScale:"Barevná škála větru", scaleCap:"Barva čísla podle síly větru. Přidej nebo uber stupně.", scaleFrom:"od (m/s)", scaleAdd:"+ Přidat stupeň", mGap:"Rozteč čísel", mCgap:"Šířka sloupce", mDays:"Počet dní", daysNote:"Nad 7 dní je předpověď orientační (hrubší modely).",
+   psdDesc:"Směry, ze kterých spot jede. Zelený výsek v růžici.", psmDesc:"Pod tímto větrem se den bere jako slabý.", psModDesc:"Necháš auto, nebo vynutíš model (Garda = AROME).", modInfoBtn:"Který model vybrat? \u25be", modInfoHide:"Skrýt \u25b4",
+   modGuide:[
+   ["Auto (nejlepší)","Open-Meteo samo vybere pro každý bod nejpřesnější dostupný model. <b>Nech u většiny spotů</b> \u2014 pro české a německé nádrže je to ideální."],
+   ["AROME 1,3 km","Francouzský jemný model. Skvěle chytá <b>místní a termický vítr v horách</b> \u2014 proto <b>Garda</b> (Pelér/Ora). Malá doména (Francie + Alpy), jinde nedosáhne."],
+   ["ICON-CH1","Švýcarský model 1 km pro <b>Alpy</b>. Podobně jako AROME dobrý na horské údolní větry. Alternativa pro Gardu."],
+   ["ICON (D2/EU)","Německý model. <b>ICON-D2</b> je 2 km na blízko (ČR, DE, AT) \u2014 nejlepší pro naše nádrže. <b>ICON-EU</b> 7 km je hrubší, dál."],
+   ["ECMWF","Evropský globální model. <b>Nejspolehlivější na velký obraz</b> a delší výhled, ale hrubý (9 km) \u2014 nezachytí malé místní jevy."],
+   ["GFS","Americký globální 13 km. <b>Nejhrubší.</b> Na termiku malých jezer (Garda) je zbytečný \u2014 hlásí bezvětří, i když jede. Ber jako poslední volbu."]],
+   modTip:"Zkráceně: <b>Auto</b> na ČR/DE, <b>AROME</b> na Gardu a Alpy, <b>GFS</b> na termické spoty nedávej.", psReset:"Vrátit spot do výchozího", psResetDone:"vráceno", psHint:"Klepni do růžice: první klik = odkud, druhý = kam. Zelený výsek jede.",
    kite:{gear:"kity", one:"kite", u:"m²"}, ws:{gear:"plachty", one:"plachta", u:"m²"}},
  en:{sub:"{w} kg · {gear}: {list}", load:"Loading data…", offline:"⚠ offline — last downloaded data ({t})",
    timeout:"connection timed out (12 s) — weak signal?", errT:"Could not load data",
@@ -348,7 +408,16 @@ var T={
    aKmh:"from home, only for sorting", aWgh:"number from the widget, optional", aDh:"optional, also editable in spot settings",
    aErr:"Fill in name and coordinates (both Lat and Lon).",
    nsec:"Number of directions", s1:"1 direction", s2:"2 directions",
-   psHint:"Tap the rose: first tap = from, second = to. Green arc rides.",
+   psMod:"Data source (model)", watch:"watch", notifBtn:"Enable morning alerts", notifOn:"Morning alerts: on", notifOff:"Morning alerts: off", notifNo:"Alerts: unsupported", watchCap:"Checked spots go into the morning alert (once delivery is live).", mScale:"Wind colour scale", scaleCap:"Number colour by wind strength. Add or remove steps.", scaleFrom:"from (m/s)", scaleAdd:"+ Add step", mGap:"Number spacing", mCgap:"Column width", mDays:"Days", daysNote:"Beyond 7 days the forecast is rough (coarse models).",
+   psdDesc:"Directions the spot works from. Green arc in the rose.", psmDesc:"Below this wind the day counts as weak.", psModDesc:"Leave auto, or force a model (Garda = AROME).", modInfoBtn:"Which model? \u25be", modInfoHide:"Hide \u25b4",
+   modGuide:[
+   ["Auto (best)","Open-Meteo picks the most accurate available model per point. <b>Leave this for most spots</b> \u2014 ideal for Czech and German lakes."],
+   ["AROME 1.3 km","French high-res model. Great at <b>local and thermal mountain wind</b> \u2014 hence <b>Garda</b> (Peler/Ora). Small domain (France + Alps) only."],
+   ["ICON-CH1","Swiss 1 km model for the <b>Alps</b>. Like AROME, good for valley winds. Alternative for Garda."],
+   ["ICON (D2/EU)","German model. <b>ICON-D2</b> is 2 km close-in (CZ, DE, AT) \u2014 best for our lakes. <b>ICON-EU</b> 7 km is coarser, wider."],
+   ["ECMWF","European global model. <b>Most reliable big picture</b> and longer range, but coarse (9 km) \u2014 misses small local effects."],
+   ["GFS","US global 13 km. <b>Coarsest.</b> Useless for small-lake thermals (Garda) \u2014 reports calm when it's blowing. Last resort."]],
+   modTip:"Short version: <b>Auto</b> for CZ/DE, <b>AROME</b> for Garda and the Alps, avoid <b>GFS</b> on thermal spots.", psReset:"Reset spot to default", psResetDone:"done", psHint:"Tap the rose: first tap = from, second = to. Green arc rides.",
    kite:{gear:"kites", one:"kite", u:"m²"}, ws:{gear:"sails", one:"sail", u:"m²"}},
  de:{sub:"{w} kg · {gear}: {list}", load:"Lade Daten…", offline:"⚠ offline — letzte Daten ({t})",
    timeout:"Zeitüberschreitung (12 s) — schwaches Signal?", errT:"Daten konnten nicht geladen werden",
@@ -384,7 +453,16 @@ var T={
    aKmh:"von zu Hause, nur zum Sortieren", aWgh:"Nummer vom Widget, optional", aDh:"optional, auch in Spot-Einstellungen",
    aErr:"Name und Koordinaten (Lat und Lon) ausfüllen.",
    nsec:"Anzahl Richtungen", s1:"1 Richtung", s2:"2 Richtungen",
-   psHint:"In die Rose tippen: erster Tipp = von, zweiter = bis. Grüner Bogen fährt.",
+   psMod:"Datenquelle (Modell)", watch:"beob.", notifBtn:"Morgen-Alarm aktivieren", notifOn:"Morgen-Alarm: an", notifOff:"Morgen-Alarm: aus", notifNo:"Alarm: nicht unterstützt", watchCap:"Markierte Spots kommen in den Morgen-Alarm (sobald Zustellung aktiv).", mScale:"Wind-Farbskala", scaleCap:"Zahlenfarbe nach Windstärke. Stufen hinzufügen/entfernen.", scaleFrom:"ab (m/s)", scaleAdd:"+ Stufe", mGap:"Zahlenabstand", mCgap:"Spaltenbreite", mDays:"Tage", daysNote:"Über 7 Tage nur grobe Prognose.",
+   psdDesc:"Richtungen, aus denen der Spot geht. Grüner Bogen in der Rose.", psmDesc:"Unter diesem Wind gilt der Tag als schwach.", psModDesc:"Auto lassen oder Modell erzwingen (Garda = AROME).", modInfoBtn:"Welches Modell? \u25be", modInfoHide:"Verbergen \u25b4",
+   modGuide:[
+   ["Auto (bestes)","Open-Meteo wählt pro Punkt das genaueste Modell. <b>Für die meisten Spots lassen</b> \u2014 ideal für Seen in CZ/DE."],
+   ["AROME 1,3 km","Französisches Feinmodell. Stark bei <b>lokalem und thermischem Bergwind</b> \u2014 daher <b>Garda</b> (Peler/Ora). Kleine Domäne (Frankreich + Alpen)."],
+   ["ICON-CH1","Schweizer 1-km-Modell für die <b>Alpen</b>. Wie AROME gut für Talwinde. Alternative für Garda."],
+   ["ICON (D2/EU)","Deutsches Modell. <b>ICON-D2</b> 2 km nah (CZ, DE, AT) \u2014 am besten für unsere Seen. <b>ICON-EU</b> 7 km gröber."],
+   ["ECMWF","Europäisches Globalmodell. <b>Zuverlässigstes Gesamtbild</b> und längere Sicht, aber grob (9 km)."],
+   ["GFS","US-Global 13 km. <b>Am gröbsten.</b> Für Thermik kleiner Seen (Garda) nutzlos \u2014 meldet Flaute. Letzte Wahl."]],
+   modTip:"Kurz: <b>Auto</b> für CZ/DE, <b>AROME</b> für Garda und Alpen, <b>GFS</b> nicht für Thermik-Spots.", psReset:"Spot zurücksetzen", psResetDone:"erledigt", psHint:"In die Rose tippen: erster Tipp = von, zweiter = bis. Grüner Bogen fährt.",
    kite:{gear:"Kites", one:"Kite", u:"m²"}, ws:{gear:"Segel", one:"Segel", u:"m²"}}
 };
 function tr(k){ return T[CFG.lang][k]; }
@@ -393,6 +471,7 @@ function fmt(s,o){ for(var k in o) s=s.split("{"+k+"}").join(o[k]); return s; }
 
 /* ================= stav ================= */
 var CFG=loadCfg(), DATA=null, DATES=[], CONF={}, SST=null, SEL=null, SW_REG=null;
+(function(){ var th=CFG.theme||"dark"; document.documentElement.setAttribute("data-theme",th); })();
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
 
 /* ================= render: statické texty ================= */
@@ -453,39 +532,32 @@ function dayBlock(spot,si,date,di){
   var winH=a.hrs;
   var cells=winH.map(function(x){
     var live=inSector(x.dir,spot.dirs);
-    var barCol=!live?'var(--dim)':x.wind>=(spot.min!=null?spot.min:6)?'var(--spine)':x.wind>=5?'var(--mar)':'var(--dim)';
-    var hw=Math.max(2,(Math.min(x.wind,MX)/MX)*24), hg=Math.max(hw,(Math.min(x.gust,MX)/MX)*24);
+    var mCol=!live?'var(--dim)':speedColor(x.wind,CFG.scale);
     var lab=x.hour%3===0;
     return '<div class="hr">'+
       '<div class="shw">'+(x.show>0.3?'🌧':'')+'</div>'+
-      '<div class="hv">'+(lab?Math.round(convW(x.wind,CFG.unit)):'')+'</div>'+
-      '<div class="bar"><div class="g" style="bottom:'+hg+'px"></div><div class="w" style="height:'+hw+'px;background:'+barCol+';opacity:'+(live?0.95:0.4)+'"></div></div>'+
-      arrow(x.dir)+starStack(x.wind,live,th)+
+      arrow(x.dir)+
+      '<div class="nums"><span class="nm" style="color:'+mCol+'">'+Math.round(convW(x.wind,CFG.unit))+'</span>'+
+      '<span class="ng" style="color:'+(live?speedColor(x.gust,CFG.scale):'var(--dim)')+'">'+Math.round(convW(x.gust,CFG.unit))+'</span></div>'+
       '<div class="hlab">'+(lab?x.hour:'')+'</div></div>';
   }).join('');
-  var verd = a.v==="go" ? (a.runs.length>1?t.jede2:t.jede) : a.v==="mar"?t.mar : a.v==="storm"?t.storm
-           : (a.noWind?t.nowind:t.baddir);
   var vc = a.v==="nic"?"nic":a.v;
-  var wind;
-  if(a.runs.length){
-    wind=a.runs.map(function(w){
-      return '<b>'+w.from+'–'+w.to+'h</b> '+convW(w.mean,CFG.unit).toFixed(1)+' '+unitLbl(CFG.unit)+
-        ' '+compassP(w.dir,CFG.lang)+(w.g?' · '+w.g+' '+trm().u:'');
-    }).join(' | ');
-  } else if(a.v==="storm"){ wind=t.storm; }
-  else { wind=t.max+' '+convW(a.peak,CFG.unit).toFixed(1)+' '+unitLbl(CFG.unit); }
   var mid=winH[Math.floor(winH.length/2)]||{};
   var env=[];
   if(mid.temp!=null) env.push('🌡 '+Math.round(convT(mid.temp,CFG.tunit))+'°');
   var ct=cloudTxt(mid.cloud); if(ct) env.push(ct);
   var lu=lightUntil(sunset); if(lu) env.push(t.light+' '+lu);
   var conf=(CONF[spot.id]||{})[date];
-  return '<div class="day '+vc+'"><div class="dhead"><span class="dname">'+dayName(date)+'</span>'+
-    confDot(conf)+'<span class="dverd '+vc+'">'+verd+'</span></div>'+
+  return '<div class="day '+vc+'" id="'+spot.id+'-'+di+'"><div class="dhead"><span class="dname">'+dayName(date)+'</span>'+
+    confDot(conf)+'</div>'+
     '<div class="hours">'+cells+'</div>'+
-    '<div class="dfoot"><span>'+wind+'</span><span>'+env.join(' · ')+'</span></div></div>';
+    '<div class="dfoot">'+env.join(' · ')+'</div></div>';
 }
 function render(){
+  document.documentElement.style.setProperty("--numgap",(CFG.numgap!=null?CFG.numgap:1.05));
+  var _cw=(CFG.colgap!=null?CFG.colgap:20);
+  document.documentElement.style.setProperty("--colw",_cw+"px");
+  document.documentElement.style.setProperty("--daypad",Math.max(5,Math.min(12,Math.round(_cw*0.35)))+"px");
   applyLang();
   if(!DATA) return;
   var spots=effSpots(CFG);
@@ -500,13 +572,22 @@ function render(){
     return {s:s,si:si,score:best,bv:bv};
   });
   if(CFG.sort!=="custom") scored.sort(function(a,b){return b.score-a.score||a.s.km-b.s.km;});
+  var rank={go:3,mar:2,storm:1,nic:0};
   document.getElementById("out").innerHTML='<div class="grid">'+scored.map(function(r){
     var s=r.s;
-    var wt = s.sea&&SST!=null ? '<br>🌊 '+Math.round(convT(SST,CFG.tunit))+'°' : '';
+    var wt = s.sea&&SST!=null ? ' · 🌊 '+Math.round(convT(SST,CFG.tunit))+'°' : '';
+    // štítky dní: barevný obdélníček dle verdiktu každého dne
+    var pills=DATES.map(function(d,di){
+      var a=assess((DATA[r.si]||{days:{}}).days[d]||[],s,CFG);
+      var vc=a?(a.v==="nic"?"nic":a.v):"nic";
+      return '<span class="pill '+vc+'" data-goto="'+s.id+'-'+di+'">'+dayName(d)+'</span>';
+    }).join('');
+    var strip=DATES.map(function(d,di){return dayBlock(s,r.si,d,di);}).join('');
     return '<div class="spot '+r.bv+'" data-id="'+s.id+'">'+
       '<div class="shead"><div><span class="sname">'+esc(s.name)+'</span><div class="ssub">'+esc(s.sub)+'</div></div>'+
-      '<div class="smeta">'+s.km+' km<span class="scog" data-ps="'+s.id+'">⚙</span>'+wt+'</div></div>'+
-      DATES.map(function(d,di){return dayBlock(s,r.si,d,di);}).join('')+'</div>';
+      '<div class="smeta">'+s.km+' km'+wt+'<span class="scog" data-ps="'+s.id+'">⚙</span></div></div>'+
+      '<div class="pills">'+pills+'</div>'+
+      '<div class="strip" id="strip-'+s.id+'">'+strip+'</div></div>';
   }).join('')+'</div>'+(window.__off?'<div class="offnote">'+window.__off+'</div>':'');
 }
 
@@ -529,7 +610,7 @@ function showWG(id){
   var anchor=document.createElement("script"); anchor.id=uid; slot.appendChild(anchor);
   var ld=document.createElement("script");
   ld.src="https://www.windguru.cz/js/widget.php?"+["s="+s.wg,"m=100","uid="+uid,"wj=ms","tj=c",
-    "odh=0","doh=24","fhours=96","hrsm=2","vt=forecasts","lng="+(CFG.lang==="cs"?"cz":CFG.lang),"idbs=1",
+    "odh=0","doh=24","fhours="+((CFG.days||4)*24),"hrsm=2","vt=forecasts","lng="+(CFG.lang==="cs"?"cz":CFG.lang),"idbs=1",
     "p=WINDSPD,GUST,SMER,APCP1s,RATING"].join("&");
   slot.appendChild(ld);
   wrap.scrollIntoView({behavior:"smooth",block:"nearest"});
@@ -552,8 +633,9 @@ function load(){
   var main=spots.filter(function(s){return !s.model;});
   var custom=spots.filter(function(s){return s.model;});
   var seas=spots.filter(function(s){return s.sea;});
-  var jobs=[ fx(urlMain(main)) ];
-  jobs.push(custom.length?Promise.all(custom.map(function(s){return fx(urlModel([s],s.model)).catch(function(){return null;});})):Promise.resolve([]));
+  var nd=CFG.days||4;
+  var jobs=[ fx(urlMain(main,nd)) ];
+  jobs.push(custom.length?Promise.all(custom.map(function(s){return fx(urlModel([s],s.model,nd)).catch(function(){return null;});})):Promise.resolve([]));
   jobs.push(fx(urlConf(spots)).catch(function(){return null;}));
   jobs.push(seas.length?fx(urlMarine(seas[0])).catch(function(){return null;}):Promise.resolve(null));
   Promise.all(jobs).then(function(res){
@@ -565,7 +647,7 @@ function load(){
     });
     DATA=spots.map(function(s){ return byId[s.id]||{days:{},sunset:{}}; });
     var first=DATA.filter(function(d){return Object.keys(d.days).length;})[0];
-    DATES=first?Object.keys(first.days).sort().slice(0,4):[];
+    DATES=first?Object.keys(first.days).sort().slice(0,nd):[];
     CONF={};
     if(res[2]){
       var ca=Array.isArray(res[2])?res[2]:[res[2]];
@@ -612,9 +694,15 @@ function openSet(psId){
   document.getElementById("m_sc").textContent=t.sortC;
   document.getElementById("m_gear").textContent=CFG.mode==="kite"?t.gearK:t.gearW;
   document.getElementById("m_gearcap").textContent=t.gearCap;
+  document.getElementById("m_scale").textContent=t.mScale;
+  document.getElementById("m_scalecap").textContent=t.scaleCap;
+  document.getElementById("addscale").textContent=t.scaleAdd;
+  renderScaleTab();
   document.getElementById("addgear").textContent=fmt(t.addG,{one:m.one});
   document.getElementById("m_spots").textContent=t.spots;
   document.getElementById("addspotbtn").textContent=t.addS;
+  document.getElementById("m_watchcap").textContent=t.watchCap;
+  refreshNotifUI();
   document.getElementById("a_n").textContent=t.name;
   document.getElementById("a_d").textContent=t.dirs;
   document.getElementById("f_ok").textContent=t.okBtn;
@@ -637,6 +725,14 @@ function openSet(psId){
   document.getElementById("ps_hint").textContent=t.psHint;
   document.getElementById("i_home").value=CFG.home;
   document.getElementById("i_w").value=CFG.weight;
+  document.getElementById("m_gap").textContent=T[CFG.lang].mGap;
+  var gp=document.getElementById("i_gap"); gp.value=CFG.numgap!=null?CFG.numgap:1.05;
+  document.getElementById("gapval").textContent=(+gp.value).toFixed(2);
+  document.getElementById("m_cgap").textContent=T[CFG.lang].mCgap;
+  var cg=document.getElementById("i_cgap"); cg.value=CFG.colgap!=null?CFG.colgap:20;
+  document.getElementById("cgapval").textContent=cg.value+" px";
+  document.getElementById("m_days").textContent=T[CFG.lang].mDays;
+  document.querySelectorAll("#daysseg span").forEach(function(sp){sp.classList.toggle("on",+sp.dataset.d===(CFG.days||4));});
   document.getElementById("i_h1").value=CFG.hStart;
   document.getElementById("i_h2").value=CFG.hEnd;
   document.getElementById("i_cape").value=CFG.cape;
@@ -646,6 +742,16 @@ function openSet(psId){
   document.getElementById("ovl").classList.add("on");
 }
 function closeSet(){ document.getElementById("ovl").classList.remove("on"); }
+function renderScaleTab(){
+  var t=T[CFG.lang], sc=CFG.scale||[];
+  var h='<tr><th>'+t.scaleFrom+'</th><th>barva</th><th></th></tr>';
+  sc.forEach(function(st,i){
+    h+='<tr><td><input class="inp" data-sc="'+i+'" data-k="from" type="number" step="0.5" value="'+st.from+'" style="width:64px"></td>'+
+       '<td><input type="color" data-sc="'+i+'" data-k="col" value="'+st.col+'" style="width:44px;height:24px;border:1px solid var(--line);background:var(--bg);border-radius:3px"></td>'+
+       '<td class="rm" data-scrm="'+i+'">'+(sc.length>1?'\u2715':'')+'</td></tr>';
+  });
+  document.getElementById("scaletab").innerHTML=h;
+}
 function renderGearTab(){
   var t=T[CFG.lang], g=CFG.gear[CFG.mode], th=CFG.starTh;
   var h='<tr><th>'+t.gcol[0]+' ('+trm().u+')</th><th>'+t.gcol[1]+'</th><th>'+t.gcol[2]+'</th><th>'+t.gcol[3]+'</th><th></th></tr>';
@@ -743,6 +849,18 @@ function openPS(id){
   document.getElementById("ps_dirs").value=dirs?dirs.map(function(x){return x[0]+"-"+x[1];}).join(","):"";
   document.getElementById("ps_min").value=o.min!=null?o.min:(base.min!=null?base.min:6.0);
   document.getElementById("ps_wg").value=o.wg!==undefined?(o.wg||""):(base.wg||"");
+  document.getElementById("ps_model").value=o.model!==undefined?(o.model||""):(base.model||"");
+  document.getElementById("ps_mod").textContent=T[CFG.lang].psMod;
+  document.getElementById("ps_ddesc").textContent=T[CFG.lang].psdDesc;
+  document.getElementById("ps_mdesc").textContent=T[CFG.lang].psmDesc;
+  document.getElementById("ps_moddesc").textContent=T[CFG.lang].psModDesc;
+  document.getElementById("ps_reset").textContent=T[CFG.lang].psReset;
+  var mi=document.getElementById("modinfo");
+  mi.innerHTML=T[CFG.lang].modGuide.map(function(g){
+    return '<div style="margin-bottom:6px"><b style="color:var(--accent)">'+g[0]+'</b> — '+g[1]+'</div>';
+  }).join('')+'<div style="border-top:1px solid var(--line);padding-top:6px;margin-top:2px">'+T[CFG.lang].modTip+'</div>';
+  mi.style.display="none";
+  document.getElementById("modinfo_btn").textContent=T[CFG.lang].modInfoBtn;
   psFromText();
 }
 
@@ -763,16 +881,18 @@ function renderSpotTab(){
   var all=BASE_SPOTS.concat(CFG.added||[]);
   if(CFG.sort==="custom"&&(CFG.order||[]).length)
     all.sort(function(a,b){var ia=CFG.order.indexOf(a.id),ib=CFG.order.indexOf(b.id);return (ia<0?99:ia)-(ib<0?99:ib);});
-  var h='<tr><th></th><th>'+t.name+'</th><th>km</th><th>'+t.dirs+'</th><th></th><th></th><th></th></tr>';
+  var h='<tr><th></th><th>'+t.name+'</th><th>km</th><th>'+t.dirs+'</th><th>\uD83D\uDD14</th><th></th><th></th><th></th></tr>';
   all.forEach(function(sp){
     var o=(CFG.ov||{})[sp.id]||{};
     var dirs=o.dirs!==undefined?o.dirs:sp.dirs;
     var hid=(CFG.hidden||{})[sp.id];
     var added=(CFG.added||[]).some(function(a){return a.id===sp.id;});
+    var watched=(CFG.watch||{})[sp.id];
     h+='<tr class="'+(hid?'off':'')+'">'+
       '<td><span class="ic" data-up="'+sp.id+'">\u25B2</span><span class="ic" data-dn="'+sp.id+'">\u25BC</span></td>'+
       '<td class="nm">'+esc(sp.name)+'</td><td class="mono">'+(o.km!==undefined?o.km:sp.km)+'</td>'+
       '<td class="mono">'+(dirsToStr(dirs)||"\u2014")+'</td>'+
+      '<td><span class="ic bell'+(watched?" on":"")+'" data-watch="'+sp.id+'">'+(watched?"\uD83D\uDD14":"\uD83D\uDD15")+'</span></td>'+
       '<td><span class="ic" data-cfg="'+sp.id+'">\u2699</span></td>'+
       '<td><span class="ic" data-eye="'+sp.id+'">'+(hid?'\uD83D\uDEAB':'\uD83D\uDC41')+'</span></td>'+
       '<td>'+(added?'<span class="ic" data-del="'+sp.id+'">\u2715</span>':'')+'</td></tr>';
@@ -785,12 +905,20 @@ function collectGlobal(){
   CFG.hStart=Math.max(0,Math.min(23,+document.getElementById("i_h1").value||6));
   CFG.hEnd=Math.max(CFG.hStart+1,Math.min(23,+document.getElementById("i_h2").value||21));
   CFG.cape=+document.getElementById("i_cape").value||1500;
+  CFG.numgap=+document.getElementById("i_gap").value||1.05;
+  CFG.colgap=+document.getElementById("i_cgap").value||20;
   var g=CFG.gear[CFG.mode];
   document.querySelectorAll("#geartab input").forEach(function(inp){
     var i=+inp.dataset.g,k=inp.dataset.k; if(g[i]) g[i][k]= k==="s"?inp.value:(+inp.value||g[i][k]);
   });
   g.sort(function(a,b){return a.f-b.f;});
   CFG.starTh=starThFor(g.length);
+  var sc=CFG.scale||[];
+  document.querySelectorAll("#scaletab input").forEach(function(inp){
+    var i=+inp.dataset.sc,k=inp.dataset.k; if(sc[i]) sc[i][k]= k==="from"?(+inp.value):inp.value;
+  });
+  sc.sort(function(a,b){return a.from-b.from;});
+  CFG.scale=sc;
 }
 function collectPS(){
   var id=document.getElementById("ps_id").value; if(!id) return;
@@ -799,6 +927,7 @@ function collectPS(){
   o.dirs=parseDirs(document.getElementById("ps_dirs").value);
   var mn=+document.getElementById("ps_min").value; if(mn)o.min=mn;
   var wg=document.getElementById("ps_wg").value.trim(); o.wg=wg?+wg:null;
+  var md=document.getElementById("ps_model").value; o.model=md||null;
   CFG.ov[id]=o;
 }
 function collectAndSave(){
@@ -809,6 +938,12 @@ function collectAndSave(){
 
 /* ================= události ================= */
 document.getElementById("gearbtn").onclick=function(){openSet(null);};
+document.getElementById("themebtn").onclick=function(){
+  CFG.theme=(CFG.theme==="light")?"dark":"light";
+  document.documentElement.setAttribute("data-theme",CFG.theme);
+  document.querySelector('meta[name="theme-color"]').setAttribute("content",CFG.theme==="light"?"#EEF3F8":"#0B2545");
+  saveCfg(CFG);
+};
 document.getElementById("modeseg").addEventListener("click",function(e){var m=e.target.dataset.m;if(!m)return;CFG.mode=m;CFG.starTh=starThFor(CFG.gear[m].length);document.querySelectorAll("#modeseg span").forEach(function(sp){sp.classList.toggle("on",sp.dataset.m===m);});renderGearTab();document.getElementById("m_gear").textContent=CFG.mode==="kite"?T[CFG.lang].gearK:T[CFG.lang].gearW;document.getElementById("addgear").textContent=fmt(T[CFG.lang].addG,{one:trm().one});document.getElementById("apptitle").textContent=appTitle();document.title=appTitle();var m=trm();document.getElementById("subline").textContent=fmt(T[CFG.lang].sub,{w:CFG.weight,gear:m.gear,list:CFG.gear[CFG.mode].map(function(x){return x.s;}).join("/")+" "+m.u});});
 document.getElementById("secseg").addEventListener("click",function(e){var n=+e.target.dataset.n;if(!n)return;setNsec(n);});
 document.getElementById("rose1").addEventListener("click",function(e){roseClick(0,e);});
@@ -828,6 +963,39 @@ document.getElementById("sortseg").addEventListener("click",function(e){
   var s=e.target.dataset.s; if(!s)return; CFG.sort=s;
   document.querySelectorAll("#sortseg span").forEach(function(x){x.classList.toggle("on",x.dataset.s===s);});
 });
+document.getElementById("i_cgap").addEventListener("input",function(){
+  document.getElementById("cgapval").textContent=this.value+" px";
+  document.documentElement.style.setProperty("--colw",this.value+"px");
+  document.documentElement.style.setProperty("--daypad",Math.max(5,Math.min(12,Math.round(this.value*0.35)))+"px");
+});
+document.getElementById("daysseg").addEventListener("click",function(e){
+  var d=+e.target.dataset.d; if(!d)return; CFG.days=d;
+  document.querySelectorAll("#daysseg span").forEach(function(sp){sp.classList.toggle("on",+sp.dataset.d===d);});
+});
+document.getElementById("i_gap").addEventListener("input",function(){
+  document.getElementById("gapval").textContent=(+this.value).toFixed(2);
+  document.documentElement.style.setProperty("--numgap",this.value); /* živý náhled pod modalem */
+});
+document.getElementById("addscale").onclick=function(){
+  CFG.scale=CFG.scale||[]; var last=CFG.scale[CFG.scale.length-1];
+  CFG.scale.push({from:(last?last.from+3:6),col:"#FF7A6B"}); renderScaleTab();
+};
+document.getElementById("scaletab").addEventListener("click",function(e){
+  var rm=e.target.dataset.scrm;
+  if(rm!==undefined&&CFG.scale.length>1){ CFG.scale.splice(+rm,1); renderScaleTab(); }
+});
+document.getElementById("modinfo_btn").onclick=function(){
+  var mi=document.getElementById("modinfo"), b=document.getElementById("modinfo_btn"), t=T[CFG.lang];
+  if(mi.style.display==="none"){ mi.style.display="block"; b.textContent=t.modInfoHide; }
+  else { mi.style.display="none"; b.textContent=t.modInfoBtn; }
+};
+document.getElementById("ps_reset").onclick=function(){
+  var id=document.getElementById("ps_id").value; if(!id)return;
+  if(CFG.ov)delete CFG.ov[id];
+  openPS(id);
+  var b=document.getElementById("ps_reset"); b.textContent=T[CFG.lang].psResetDone;
+  setTimeout(function(){b.textContent=T[CFG.lang].psReset;},1200);
+};
 document.getElementById("addgear").onclick=function(){
   var g=CFG.gear[CFG.mode];
   g.push({s:"?",f:6,t:12});
@@ -861,6 +1029,7 @@ document.getElementById("f_ok").onclick=function(){
 document.getElementById("spottab").addEventListener("click",function(e){
   var d=e.target.dataset;
   if(d.cfg){ collectGlobal(); saveCfg(CFG); openSet(d.cfg); return; }
+  if(d.watch){ CFG.watch=CFG.watch||{}; CFG.watch[d.watch]=!CFG.watch[d.watch]; renderSpotTab(); }
   if(d.eye){ CFG.hidden=CFG.hidden||{}; CFG.hidden[d.eye]=!CFG.hidden[d.eye]; renderSpotTab(); }
   if(d.del){ CFG.added=(CFG.added||[]).filter(function(a){return a.id!==d.del;}); renderSpotTab(); }
   if(d.up||d.dn){
@@ -875,6 +1044,10 @@ document.getElementById("spottab").addEventListener("click",function(e){
 document.getElementById("out").addEventListener("click",function(e){
   var cog=e.target.closest(".scog");
   if(cog){ e.stopPropagation(); openSet(cog.dataset.ps); return; }
+  var pill=e.target.closest(".pill");
+  if(pill){ e.stopPropagation(); var el=document.getElementById(pill.dataset.goto);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"nearest",inline:"start"}); return; }
+  if(e.target.closest(".strip")) return; /* posouvání pásu neotvírá WG */
   var tile=e.target.closest(".spot");
   if(tile) showWG(tile.dataset.id);
 });
@@ -885,6 +1058,55 @@ document.getElementById("legbtn").onclick=function(){
 
 /* ================= PWA (jen offline cache) ================= */
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }
+
+/* ---- ranní upozornění: klientská půlka (doručování přijde s GitHub Actions) ---- */
+function refreshNotifUI(){
+  var t=T[CFG.lang], txt=document.getElementById("m_notiftxt"), btn=document.getElementById("notifbtn");
+  if(!txt) return;
+  if(!("Notification"in window)){ txt.textContent=t.notifNo; btn.style.display="none"; return; }
+  var tb=document.getElementById("notiftest");
+  if(Notification.permission==="granted"&&CFG.notify){
+    txt.textContent=t.notifOn; btn.style.display="none"; if(tb)tb.style.display="";
+  } else { if(tb)tb.style.display="none";
+    txt.textContent=t.notifOff; btn.style.display=""; btn.textContent=t.notifBtn;
+  }
+}
+document.getElementById("notiftest").onclick=function(){
+  if(navigator.serviceWorker&&navigator.serviceWorker.controller)
+    navigator.serviceWorker.controller.postMessage("run-morning");
+};
+document.getElementById("notifbtn").onclick=function(){
+  if(!("Notification"in window)) return;
+  Notification.requestPermission().then(function(p){
+    if(p==="granted"){ CFG.notify=true; saveCfg(CFG); registerMorning(); }
+    refreshNotifUI();
+  });
+};
+
+/* obal saveCfg: kromě localStorage zapiš config i do Cache pro service worker */
+function pushCfgToSW(){
+  try{
+    var slim={notify:CFG.notify,watch:CFG.watch,added:CFG.added,ov:CFG.ov,gear:CFG.gear,
+      starTh:CFG.starTh,scale:CFG.scale,hStart:CFG.hStart,hEnd:CFG.hEnd,cape:CFG.cape,
+      weight:CFG.weight,mode:CFG.mode};
+    if("caches"in window) caches.open("obozwind-cfg").then(function(c){
+      c.put("https://obozwind.local/cfg", new Response(JSON.stringify(slim),{headers:{"Content-Type":"application/json"}}));
+    });
+  }catch(e){}
+}
+var _saveCfg=saveCfg;
+saveCfg=function(c){ _saveCfg(c); pushCfgToSW(); };
+pushCfgToSW();
+
+/* registrace ranní kontroly na pozadí po zapnutí upozornění */
+function registerMorning(){
+  if(!("serviceWorker"in navigator)) return;
+  navigator.serviceWorker.ready.then(function(reg){
+    if(reg.periodicSync){
+      reg.periodicSync.register("obozwind-morning",{minInterval:12*60*60*1000}).catch(function(){});
+    }
+  });
+}
 
 applyLang(); load();
 </script>

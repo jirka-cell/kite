@@ -30,14 +30,15 @@ var BASE_SPOTS = [
 
 var DEFAULT_CFG = {
   lang:"cs", mode:"kite", unit:"ms", tunit:"c",
-  weight:98, home:"Karlovy Vary",
+  weight:98, home:"Karlovy Vary", numgap:1.05, colgap:20, days:4,
   hStart:6, hEnd:21, cape:1500, brief:true, sort:"wind",
   gear:{
     kite:[{s:"14",f:6.0,t:9.5},{s:"12",f:8.0,t:12.2},{s:"8",f:12.2,t:18.0}],
     ws:  [{s:"7.8",f:6.0,t:9.5},{s:"6.2",f:8.5,t:12.5},{s:"5.0",f:12.0,t:18.0}]
   },
   starTh:[6,9,12],
-  hidden:{}, order:[], added:[], ov:{}
+  scale:[{from:6,col:"#8FD0FF"},{from:9,col:"#4FD0A0"},{from:12,col:"#F5C542"},{from:15,col:"#E8974A"}],
+  hidden:{}, order:[], added:[], ov:{}, watch:{nechran:true,medard:true,rugen:true}, notify:false
 };
 
 function loadCfg(){
@@ -59,6 +60,8 @@ function effSpots(cfg){
     if(o.min!==undefined)  m.min=o.min;
     if(o.wg!==undefined)   m.wg=o.wg;
     if(o.km!==undefined)   m.km=o.km;
+    if(o.model!==undefined&&o.model!==null) m.model=o.model;
+    if(o.model===null) delete m.model;
     return m;
   }).filter(function(s){ return !(cfg.hidden||{})[s.id]; });
   if(cfg.sort==="custom" && (cfg.order||[]).length){
@@ -96,6 +99,27 @@ function starThFor(n){
   return out;
 }
 function stars(mean, th){ var n=0; th.forEach(function(t){ if(mean>=t) n++; }); return n; }
+
+/* ---- barva rychlosti dle editovatelné škály ---- */
+function speedColor(v, scale){
+  if(!scale||!scale.length) return "var(--go)";
+  var c=null;
+  scale.forEach(function(st){ if(v>=st.from) c=st.col; });
+  return c||"var(--dim)";
+}
+
+/* ---- ranní kontrola: má některý hlídaný spot go den v příštích 4 dnech? ---- */
+function morningCheck(dataBySpot, dates, spots, cfg){
+  var hits=[];
+  spots.forEach(function(s,i){
+    var days=(dataBySpot[i]||{days:{}}).days||{};
+    for(var di=0; di<Math.min(4,dates.length); di++){
+      var a=assess(days[dates[di]]||[], s, cfg);
+      if(a&&a.v==="go"){ hits.push({name:s.name, di:di}); break; }
+    }
+  });
+  return hits;
+}
 
 /* ---- výběr velikosti ---- */
 function pickGear(ms, gear){
@@ -161,13 +185,13 @@ function compassP(d,lang){
 }
 
 /* ---- URL builders ---- */
-function urlMain(spots){
+function urlMain(spots,days){
   return "https://api.open-meteo.com/v1/forecast?latitude="+spots.map(function(s){return s.lat;}).join(",")+
     "&longitude="+spots.map(function(s){return s.lon;}).join(",")+
     "&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation,showers,cape,temperature_2m,cloud_cover"+
-    "&daily=sunset&wind_speed_unit=ms&timezone=Europe%2FPrague&forecast_days=4";
+    "&daily=sunset&wind_speed_unit=ms&timezone=Europe%2FPrague&forecast_days="+(days||4);
 }
-function urlModel(spots,model){ return urlMain(spots)+"&models="+model; }
+function urlModel(spots,model,days){ return urlMain(spots,days)+"&models="+model; }
 function urlConf(spots){
   return "https://api.open-meteo.com/v1/forecast?latitude="+spots.map(function(s){return s.lat;}).join(",")+
     "&longitude="+spots.map(function(s){return s.lon;}).join(",")+
@@ -222,4 +246,4 @@ if(typeof module!=="undefined") module.exports={BASE_SPOTS:BASE_SPOTS,DEFAULT_CF
   dirsToStr:dirsToStr,starThFor:starThFor,stars:stars,pickGear:pickGear,convW:convW,
   unitLbl:unitLbl,convT:convT,assess:assess,confidence:confidence,compassP:compassP,
   urlMain:urlMain,urlModel:urlModel,urlConf:urlConf,urlMarine:urlMarine,
-  parseLoc:parseLoc,parseConfLoc:parseConfLoc};
+  parseLoc:parseLoc,parseConfLoc:parseConfLoc,speedColor:speedColor,morningCheck:morningCheck};
