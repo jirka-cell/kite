@@ -107,11 +107,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kite check</title>
-<link rel="manifest" href="./manifest.webmanifest">
+<link rel="manifest" href="/kite/manifest.webmanifest">
 <meta name="theme-color" content="#0B2545">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="/kite/icon-192.png">
 <script src="./scoring.js"></script>
 <style>
   :root{
@@ -1057,7 +1057,7 @@ document.getElementById("legbtn").onclick=function(){
 };
 
 /* ================= PWA (jen offline cache) ================= */
-if("serviceWorker" in navigator){ navigator.serviceWorker.register("./sw.js").catch(function(){}); }
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("/kite/sw.js").catch(function(){}); }
 
 /* ---- ranní upozornění: klientská půlka (doručování přijde s GitHub Actions) ---- */
 function refreshNotifUI(){

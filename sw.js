@@ -1,6 +1,6 @@
 /* ObozWind — service worker */
-var CACHE = "obozwind-v4";
-var SHELL = ["./","./index.html","./scoring.js","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
+var CACHE = "obozwind-v5";
+var SHELL = ["/kite/","/kite/index.html","/kite/scoring.js","/kite/manifest.webmanifest","/kite/icon-192.png","/kite/icon-512.png"];
 self.addEventListener("install", function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(SHELL);}).then(function(){return self.skipWaiting();}));
 });
@@ -16,7 +16,7 @@ self.addEventListener("fetch", function(e){
 });
 
 /* ---- ranní kontrola: běží NA POZADÍ v telefonu, bez serveru ---- */
-importScripts("./scoring.js");
+importScripts("/kite/scoring.js");
 var CFGKEY="https://obozwind.local/cfg";
 function readCfg(){
   return caches.open("obozwind-cfg").then(function(c){return c.match(CFGKEY);})
